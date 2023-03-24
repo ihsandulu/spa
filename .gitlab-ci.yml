@@ -1,0 +1,80 @@
+image: docker:latest
+
+variables:
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+
+services:
+  - docker:dind
+
+before_script:
+  - apk add --update --no-cache curl jq python3 py-pip
+  - pip install awscli
+  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
+stages:
+  - build_staging
+  - build_production
+
+build_staging:
+  variables:
+    REPOSITORY_URL: actgen/staging-accounting-pembiayaan
+  stage: build_staging
+  script:
+    - aws s3 cp s3://docker-config-activgenesis/staging-environment/accounting-pembiayaan/.env .env
+    - docker build -t $REPOSITORY_URL:latest .
+    - docker tag $REPOSITORY_URL:latest $REPOSITORY_URL:$IMAGE_TAG
+    - docker push $REPOSITORY_URL:latest
+    - docker push $REPOSITORY_URL:$IMAGE_TAG
+  tags:
+    - docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+      allow_failure: true
+
+build_blue:
+  variables:
+    REPOSITORY_URL: actgen/blue-accounting-pembiayaan-costing
+  stage: build_production
+  script:
+    - aws s3 cp s3://docker-config-activgenesis/blue-environment/accounting-pembiayaan/.env .env
+    - docker build -t $REPOSITORY_URL:latest .
+    - docker tag $REPOSITORY_URL:latest $REPOSITORY_URL:$IMAGE_TAG
+    - docker push $REPOSITORY_URL:latest
+    - docker push $REPOSITORY_URL:$IMAGE_TAG
+  tags:
+    - docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      allow_failure: true
+
+build_reds:
+  variables:
+    REPOSITORY_URL: actgen/reds-accounting-pembiayaan-costing
+  stage: build_production
+  script:
+    - aws s3 cp s3://docker-config-activgenesis/reds-environment/accounting-pembiayaan/.env .env
+    - docker build -t $REPOSITORY_URL:latest .
+    - docker tag $REPOSITORY_URL:latest $REPOSITORY_URL:$IMAGE_TAG
+    - docker push $REPOSITORY_URL:latest
+    - docker push $REPOSITORY_URL:$IMAGE_TAG
+  tags:
+    - docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      allow_failure: true
+
+build_yellow:
+  variables:
+    REPOSITORY_URL: actgen/yellow-accounting-pembiayaan-costing
+  stage: build_production
+  script:
+    - aws s3 cp s3://docker-config-activgenesis/yellow-environment/accounting-pembiayaan/.env .env
+    - docker build -t $REPOSITORY_URL:latest .
+    - docker tag $REPOSITORY_URL:latest $REPOSITORY_URL:$IMAGE_TAG
+    - docker push $REPOSITORY_URL:latest
+    - docker push $REPOSITORY_URL:$IMAGE_TAG
+  tags:
+    - docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      allow_failure: true
