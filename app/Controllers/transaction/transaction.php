@@ -1049,6 +1049,12 @@ class transaction extends baseController
         $transaction_id=$this->request->getGet("transaction_id");
         $produk=array();
         $lanjutan=array();
+        $durasi=array();
+        $parent=array();
+        $totaldurasi = 0;
+        $alert = array();
+        $start = array();
+        $transactiond = array();
         
         $product=$this->db->table("product")->get();
         foreach($product->getResult() as $xproduct){
@@ -1059,9 +1065,22 @@ class transaction extends baseController
         $transactiond=$this->db->table("transactiond")
         ->join("product","product.product_id=transactiond.product_id","left")
         ->where("transactiond.transaction_id",$transaction_id)
+        ->orderBy("product_lanjutan","ASC")
         ->get();
         foreach($transactiond->getResult() as $xtransactiond){
             $produk[]=$xtransactiond->product_id;
+            $transactiond[$xtransactiond->product_id]=$xtransactiond->transactiond_id;
+            if($xtransactiond->product_durasi>0){
+                if($xtransactiond->product_lanjutan>0){
+                    $durasi[$xtransactiond->product_lanjutan][]=$xtransactiond->product_durasi;
+                    $alert[$xtransactiond->product_lanjutan] = $xtransactiond->product_dbend;
+                }else{
+                    $durasi[$xtransactiond->product_id][]=$xtransactiond->product_durasi;
+                    $parent[]=$xtransactiond->product_id;
+                    $alert[$xtransactiond->product_id] = $xtransactiond->product_dbend;
+                    $start[$xtransactiond->product_id] = $xtransactiond->transactiond_start;
+                }
+            }
         }
         // print_r($produk);
         // print_r($lanjutan);
@@ -1074,5 +1093,31 @@ class transaction extends baseController
                 ";
             }
         }
+        foreach($parent as $xparent){
+            $totaldurasi = 0;
+            $pid=$xparent;
+            $totaldurasi =  array_sum($durasi[$pid]);
+            $peringatan = $alert[$pid];
+            $awal = $start[$pid];
+            $akhir = date("Y-m-d H:i:s", strtotime($start[$pid]." + ".$totaldurasi." minute"));
+            $ingat = date("Y-m-d H:i:s", strtotime($akhir." - ".$peringatan." minute"));
+            $transactiondid = $transactiond[$pid];
+             
+            $input["product_end"]=$akhir;
+            $input["product_bend"]=$ingat;
+            $input["transaction_id"]=$transaction_id;
+            $where["product_id"]=$pid;
+            $this->db->table("product")
+            ->update($input,$where);
+             
+            $input["transactiond_start"]=$awal;
+            $input["transactiond_end"]=$akhir;
+            $input["transactiond_bend"]=$ingat;
+            $where["transactiond_id"]=$transactiondid;
+            $this->db->table("transactiond")
+            ->update($input,$where);
+        }
     }
+
+    
 }
