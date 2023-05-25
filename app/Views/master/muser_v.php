@@ -61,12 +61,47 @@
                                             ->get();
                                         //echo $this->db->getLastQuery();
                                         ?>
-                                        <select class="form-control select" id="position_id" name="position_id">
+                                        <select onchange="cektherapist();" class="form-control select" id="position_id" name="position_id">
                                             <option value="0" <?= ($position_id == "0") ? "selected" : ""; ?>>Pilih Jabatan</option>
                                             <?php
                                             foreach ($position->getResult() as $position) { ?>
                                                 <option value="<?= $position->position_id; ?>" <?= ($position_id == $position->position_id) ? "selected" : ""; ?>><?= $position->position_name; ?></option>
                                             <?php } ?>
+                                        </select>
+                                        <script>
+                                            function cektherapist(){
+                                                let posisi = $("#position_id").val();
+                                                // alert(posisi);
+                                                if(posisi==100){
+                                                    $(".therapist").show();
+                                                }else{
+                                                    $(".therapist").hide();
+                                                }
+                                            }
+                                            $(document).ready(function(){
+                                                cektherapist();
+                                            });
+                                        </script>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-sm-12" for="user_penanggung">Penanggung Pending Bill:</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" id="user_penanggung" name="user_penanggung">
+                                            <option value="0" <?=($user_penanggung=="0")?"selected":"";?>>Tidak</option>
+                                            <option value="1" <?=($user_penanggung=="1")?"selected":"";?>>Ya</option>                                           
+                                        </select>
+
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-sm-12" for="user_lapor">Login User untuk Pajak:</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" id="user_lapor" name="user_lapor">
+                                            <option value="0" <?=($user_lapor=="0")?"selected":"";?>>Tidak</option>
+                                            <option value="1" <?=($user_lapor=="1")?"selected":"";?>>Ya</option>                                           
                                         </select>
 
                                     </div>
@@ -121,6 +156,37 @@
                                     </div>
                                 </div>
 
+                                <div class="form-group therapist">
+                                    <label class="control-label col-sm-2" for="user_trainer">Trainer:</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" id="user_trainer" name="user_trainer">
+                                            <option value="" <?=($user_trainer=="")?"selected":"";?>>Pilih Trainer</option>
+                                            <?php $user=$this->db->table("user")                                            
+                                            ->where("position_id","101")
+                                            ->get();
+                                            foreach($user->getResult() as $user){?>
+                                            <option value="<?=$user->user_id;?>" <?=($user->user_id==$user_trainer)?"selected":"";?>><?=$user->user_name;?></option>
+                                            <?php }?>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group therapist">
+                                    <label class="control-label col-sm-2" for="user_sales">Sales Product:</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" id="user_sales" name="user_sales">
+                                            <option value="" <?=($user_sales=="")?"selected":"";?>>Pilih Sales Product</option>
+                                            <?php $user=$this->db->table("user")                                            
+                                            ->where("position_id","102")
+                                            ->get();
+                                            foreach($user->getResult() as $user){?>
+                                            <option value="<?=$user->user_id;?>" <?=($user->user_id==$user_sales)?"selected":"";?>><?=$user->user_name;?></option>
+                                            <?php }?>
+                                        </select>
+
+                                    </div>
+                                </div>
+
 
 
                                 <input type="hidden" name="user_id" value="<?= $user_id; ?>" />
@@ -156,6 +222,8 @@
                                         <th>Email</th>
                                         <th>Whatsapp</th>
                                         <th>NPWP</th>
+                                        <th>Trainer</th>
+                                        <th>Sales</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -163,12 +231,14 @@
                                     $usr = $this->db
                                         ->table("user")
                                         ->join("position", "position.position_id=user.position_id", "left")
+                                        ->join("(SELECT user_id AS trainer_id, user_name AS trainer_name FROM user)trainer", "trainer.trainer_id=user.user_trainer", "left")
+                                        ->join("(SELECT user_id AS sales_id, user_name AS sales_name FROM user)sales", "sales.sales_id=user.user_sales", "left")
                                         ->join("store", "store.store_id=user.store_id", "left")
                                         ->where("position.position_administrator !=", "1")
                                         ->where("user.store_id", session()->get("store_id"))
                                         ->orderBy("user_id", "desc")
                                         ->get();
-                                    //echo $this->db->getLastquery();
+                                    // echo $this->db->getLastquery();
                                     $no = 1;
                                     foreach ($usr->getResult() as $usr) { ?>
                                         <tr>
@@ -194,6 +264,8 @@
                                             <td><?= $usr->user_email; ?></td>
                                             <td><?= $usr->user_wa; ?></td>
                                             <td><?= $usr->user_npwp; ?></td>
+                                            <td><?= $usr->trainer_name; ?></td>
+                                            <td><?= $usr->sales_name; ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>

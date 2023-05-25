@@ -53,6 +53,9 @@
                                 <!-- <table id="dataTable" class="table table-condensed table-hover w-auto dtable"> -->
                                 <thead class="">
                                     <tr>
+                                        <?php if(session()->get("user_lapor")!=1){?>
+                                        <th>Aksi</th>
+                                        <?php }?>
                                         <th>No.</th>
                                         <th>Tanggal</th>
                                         <th>Toko</th>
@@ -71,8 +74,13 @@
                                     $builder = $this->db
                                         ->table("transaction")
                                         ->join("store", "store.store_id=transaction.store_id", "left")
+                                        ->join("(SELECT user_id as uid, user_name as penanggung FROM user)pending", "pending.uid=transaction.transaction_pending", "left")
                                         ->join("user", "user.user_id=transaction.cashier_id", "left")
                                         ->where("transaction.store_id",session()->get("store_id"));
+                                        
+                                    if(session()->get("user_lapor")==1){
+                                        $builder->where("transaction.transaction_lapor","1");
+                                    }
                                     if(isset($_GET["from"])&&$_GET["from"]!=""){
                                         $builder->where("transaction.transaction_date >=",$this->request->getGet("from"));
                                     }else{
@@ -96,7 +104,34 @@
                                         if($usr->transaction_pay==null){$usr->transaction_pay=0;}
                                         if($usr->transaction_change==null){$usr->transaction_change=0;}
                                         ?>
-                                        <tr>                                            
+                                        <tr>    
+                                            <?php if(session()->get("user_lapor")!=1){?>
+                                            <td>
+                                                <?php 
+                                                if (
+                                                    (
+                                                        isset(session()->get("position_administrator")[0][0]) 
+                                                        && (
+                                                            session()->get("position_administrator") == "1" 
+                                                            || session()->get("position_administrator") == "2"
+                                                        )
+                                                    ) ||
+                                                    (
+                                                        isset(session()->get("halaman")['16']['act_create']) 
+                                                        && session()->get("halaman")['16']['act_create'] == "1"
+                                                    )
+                                                ) { ?>
+                                                <form method="post" class="btn-action" style="">
+                                                    <?php if($usr->transaction_lapor==0){?>
+                                                        <button class="btn btn-sm btn-warning " name="transaction_lapor" value="1"><span class="fa fa-check" style="color:white;"></span> </button>
+                                                    <?php }else{?>
+                                                        <button class="btn btn-sm btn-danger " name="transaction_lapor" value="0"><span class="fa fa-times" style="color:white;"></span> </button>
+                                                    <?php }?>
+                                                    <input type="hidden" name="transaction_id" value="<?= $usr->transaction_id; ?>" />
+                                                </form>
+                                                <?php }?>
+                                            </td>
+                                            <?php }?>                                        
                                             <td><a href="<?=base_url("rtransactiond?transaction_id=".$usr->transaction_id);?>" class="btn btn-xs btn-info"><span class="fa fa-cubes"></span> <?= $no++; ?></a></td>
                                             <td><?= $usr->transaction_date; ?></td>
                                             <td><?= $usr->store_name; ?></td>
@@ -106,7 +141,7 @@
                                             <td>
                                                 <?php $product=$this->db->table("transactiond")
                                                 ->join("product","product.product_id=transactiond.product_id","left")
-                                                ->where("transaction_id",$usr->transaction_id)
+                                                ->where("transactiond.transaction_id",$usr->transaction_id)
                                                 ->get();
                                                 foreach ($product->getResult() as $product) {
                                                     echo $product->product_name." (".$product->transactiond_qty."), ";
@@ -118,13 +153,20 @@
                                             <td><?= number_format($usr->transaction_change,0,".",","); $tchange+=$usr->transaction_change; ?></td>
                                             <td>
                                                 <?php
-                                                $status=array("sukses", "batal","pending");
-                                                echo $status[$usr->transaction_status]; ?>
+                                                $status=array("Sukses", "Batal","Pending Bill");
+                                                echo $status[$usr->transaction_status]; 
+                                                if($usr->transaction_status==2){
+                                                    echo " : ".$usr->penanggung;
+                                                }
+                                                ?>
                                             </td>
                                         </tr>
                                     <?php } ?>
                                     
                                         <tr>
+                                            <?php if(session()->get("user_lapor")!=1){?>
+                                            <td></td>
+                                            <?php }?>
                                             <td><?= $no; ?></td>
                                             <td></td>
                                             <td></td>

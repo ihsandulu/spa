@@ -84,6 +84,15 @@
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" id="account_name" name="account_name" placeholder="" value="<?= $account_name; ?>">
                                     </div>
+                                </div>                                                     
+                                <div class="form-group">
+                                    <label class="control-label col-sm-2" for="account_ispembayaran">Metode Pembayaran:</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" id="account_ispembayaran" name="account_ispembayaran">
+                                            <option value="0" <?=($account_ispembayaran==0)?"selected":"";?>>Tidak</option>
+                                            <option value="1" <?=($account_ispembayaran==1)?"selected":"";?>>Ya</option>
+                                        </select>
+                                    </div>
                                 </div>  
 
                                 <input type="hidden" name="account_id" value="<?= $account_id; ?>" />

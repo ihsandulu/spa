@@ -97,6 +97,24 @@ $routes->add('/mloker', 'master\mloker::index');
 
 $routes->add('/cekproductlanjutan', 'transaction\transaction::cekproductlanjutan');
 
+$routes->add('/rpkaryawan', 'report\rpkaryawan::index');
+$routes->add('/rroom', 'report\rroom::index');
+$routes->add('/tamu', 'transaction\transaction::tamu');
+
+
+$routes->add('/rfnb', 'transaction\fnb::index');
+$routes->add('/fnb', 'transaction\fnb::index');
+
+$routes->add('/room', 'utama::room');
+$routes->add('/roomstatus', 'utama::roomstatus');
+
+$routes->add('/display', 'display::index');
+$routes->add('/droom', 'display::room');
+$routes->add('/droomstatus', 'display::roomstatus');
+
+$routes->add('/upload', 'api::upload');
+$routes->add('/tupload', 'api::tupload');
+
 
 
 

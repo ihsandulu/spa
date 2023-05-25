@@ -91,7 +91,7 @@
                                             tipe();
                                         </script>
                                     </div>
-                                </div>    
+                                </div>  
                                 <div class="form-group">
                                     <label class="control-label col-sm-2" for="category_id">Kategori:</label>
                                     <div class="col-sm-10">
@@ -115,8 +115,11 @@
                                                 let alanjutan=$("#category_id>option:selected").attr("unique");
                                                 if(jasa==1 && alanjutan>0){
                                                    $(".durasi").show();
+                                                    $(".pdurasi").addAttr("required");
                                                 }else{ 
                                                     $(".durasi").hide();
+                                                    $(".pdurasi").val("");
+                                                    $(".pdurasi").removeAttr("required");
                                                 }
                                             }
                                             setTimeout(() => {
@@ -125,17 +128,27 @@
                                             
                                         </script>
                                     </div>
-                                </div>                     
+                                </div>                        
+                                <div class="form-group durasi">
+                                    <label class="control-label col-sm-12" for="product_standard">Standard/VIP:</label>
+                                    <div class="col-sm-10">
+                                        <select required class="form-control select pdurasi" id="product_standard" name="product_standard">
+                                            <option value="" <?= ($product_standard == "") ? "selected" : ""; ?>>Pilih Standard/VIP</option>
+                                            <option value="Standard" <?= ($product_standard == "Standard") ? "selected" : ""; ?>>Standard</option>
+                                            <option value="VIP" <?= ($product_standard == "VIP") ? "selected" : ""; ?>>VIP</option>                                            
+                                        </select>
+                                    </div>
+                                </div>                       
                                 <div class="form-group durasi">
                                     <label class="control-label col-sm-12" for="product_durasi">Durasi(menit):</label>
                                     <div class="col-sm-10">
-                                        <input required type="number" autofocus class="form-control" id="product_durasi" name="product_durasi" placeholder="" value="<?= $product_durasi; ?>">
+                                        <input required type="number" autofocus class="form-control pdurasi" id="product_durasi" name="product_durasi" placeholder="" value="<?= $product_durasi; ?>">
                                     </div>
                                 </div>                        
                                 <div class="form-group durasi">
                                     <label class="control-label col-sm-12" for="product_dbend">Alert Before End(menit):</label>
                                     <div class="col-sm-10">
-                                        <input required type="number" autofocus class="form-control" id="product_dbend" name="product_dbend" placeholder="" value="<?= $product_dbend; ?>">
+                                        <input required type="number" autofocus class="form-control pdurasi" id="product_dbend" name="product_dbend" placeholder="" value="<?= $product_dbend; ?>">
                                     </div>
                                 </div>                        
                                 <div class="form-group">
@@ -218,7 +231,28 @@
                                         <input onkeyup="rupiahnumerik(this);" type="number" autofocus class="form-control" id="product_sell" name="product_sell" placeholder="" value="<?= $product_sell; ?>">
                                     </div>
                                     <script>rupiahnumerik($("#product_sell"));</script>
+                                </div>                            
+                                <div class="form-group durasi">
+                                    <label id="jual" class="control-label col-sm-2" for="product_profittherapist">Profit Therapist:</label>
+                                    <div class="col-sm-10">
+                                        <input onkeyup="rupiahnumerik(this);" type="number" autofocus class="form-control pdurasi" id="product_profittherapist" name="product_profittherapist" placeholder="" value="<?= $product_profittherapist; ?>">
+                                    </div>
+                                    <script>rupiahnumerik($("#product_profittherapist"));</script>
                                 </div>                               
+                                <div class="form-group durasi">
+                                    <label id="jual" class="control-label col-sm-2" for="product_profittrainer">Profit Trainer:</label>
+                                    <div class="col-sm-10">
+                                        <input onkeyup="rupiahnumerik(this);" type="number" autofocus class="form-control pdurasi" id="product_profittrainer" name="product_profittrainer" placeholder="" value="<?= $product_profittrainer; ?>">
+                                    </div>
+                                    <script>rupiahnumerik($("#product_profittrainer"));</script>
+                                </div>                               
+                                <div class="form-group durasi">
+                                    <label id="jual" class="control-label col-sm-2" for="product_profitsales">Profit Sales Product:</label>
+                                    <div class="col-sm-10">
+                                        <input onkeyup="rupiahnumerik(this);" type="number" autofocus class="form-control pdurasi" id="product_profitsales" name="product_profitsales" placeholder="" value="<?= $product_profitsales; ?>">
+                                    </div>
+                                    <script>rupiahnumerik($("#product_profitsales"));</script>
+                                </div>                                 
                                 <div class="form-group">
                                     <label class="control-label col-sm-2" for="product_ube">UBE No.:</label>
                                     <div class="col-sm-10">
@@ -297,6 +331,7 @@
                                         <th>Beli</th>
                                         <th>Jual</th>
                                         <th>Margin</th>
+                                        <th>Profit</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -364,7 +399,12 @@
                                             <?php } ?>
                                             <td><?= $no++; ?></td>
                                             <td><?= $type[$usr->product_type]; ?></td>
-                                            <td><?= $usr->category_name; ?></td>
+                                            <td>
+                                                <?= $usr->category_name; ?>
+                                                <?php if($usr->product_durasi>0){?>
+                                                     / <small class="text-danger"><?= $usr->product_standard; ?></small>
+                                                <?php }?>
+                                            </td>
                                             <td><?= $usr->unit_name; ?></td>
                                             <td>
                                                 <?= $usr->product_name; ?>
@@ -372,7 +412,7 @@
                                                 <br/><small class="text-danger">Lanjutan: <?= $usr->pname; ?></small>
                                                 <?php }?>
                                                 <?php if($usr->product_durasi>0){?>
-                                                <br/><small class="text-danger">Lanjutan: <?= $usr->product_durasi; ?>m</small>
+                                                <br/><small class="text-danger">Durasi: <?= $usr->product_durasi; ?>m</small>
                                                 <br/><small class="text-danger">Alert: <?= $usr->product_dbend; ?>m</small>
                                                 <?php }?>
                                             </td>
@@ -393,6 +433,13 @@
                                             <td><?= ($usr->product_type==0)?number_format($buy,0,".",","):""; ?></td>
                                             <td><?= number_format($sell,0,".",","); ?></td>
                                             <td><?= number_format($margin,0,".",","); ?></td>
+                                            <td>
+                                                <?php if($usr->product_durasi>0){?>
+                                                <br/><small class="text-danger">Therapist: <?= $usr->product_profittherapist; ?></small>
+                                                <br/><small class="text-danger">Trainer: <?= $usr->product_profittrainer; ?></small>
+                                                <br/><small class="text-danger">Sales: <?= $usr->product_profitsales; ?></small>
+                                                <?php }?>
+                                            </td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>

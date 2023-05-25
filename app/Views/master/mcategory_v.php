@@ -70,11 +70,11 @@
                                     </div>
                                 </div>                               
                                 <div class="form-group">
-                                    <label class="control-label col-sm-12" for="category_lanjutan">Kategori lanjutan dari:</label>
+                                    <label class="control-label col-sm-12" for="category_lanjutan">Kategori lanjutan dari (opsional):</label>
                                     <div class="col-sm-10">
                                         <?php
                                         $category = $this->db->table("category")
-                                            ->where("category_id !=",$category_id)
+                                            ->where("store_id",session()->get("store_id"))
                                             ->orderBy("category_name", "ASC")
                                             ->get();
                                         //echo $this->db->getLastQuery();
@@ -84,6 +84,27 @@
                                             <?php
                                             foreach ($category->getResult() as $category) { ?>
                                                 <option value="<?= $category->category_id; ?>" <?= ($category_lanjutan == $category->category_id) ? "selected" : ""; ?>><?= $category->category_name; ?></option>
+                                            <?php } ?>
+                                        </select>
+
+                                    </div>
+                                </div> 
+                                                             
+                                <div class="form-group">
+                                    <label class="control-label col-sm-12" for="position_id">Terkait dengan posisi (opsional):</label>
+                                    <div class="col-sm-10">
+                                        <?php
+                                        $position = $this->db->table("position")
+                                            ->where("store_id",session()->get("store_id"))
+                                            ->orderBy("position_name", "ASC")
+                                            ->get();
+                                        //echo $this->db->getLastQuery();
+                                        ?>
+                                        <select required class="form-control select" id="position_id" name="position_id">
+                                            <option value="0" <?= ($position_id == "0") ? "selected" : ""; ?>>Pilih Posisi</option>
+                                            <?php
+                                            foreach ($position->getResult() as $position) { ?>
+                                                <option value="<?= $position->position_id; ?>" <?= ($position_id == $position->position_id) ? "selected" : ""; ?>><?= $position->position_name; ?></option>
                                             <?php } ?>
                                         </select>
 
@@ -125,6 +146,7 @@
                                         <th>No.</th>
                                         <th>Toko</th>
                                         <th>Unik</th>
+                                        <th>Posisi</th>
                                         <th>Kategori</th>
                                     </tr>
                                 </thead>
@@ -132,6 +154,7 @@
                                     <?php
                                     $usr = $this->db
                                         ->table("category")
+                                        ->join("position","position.position_id=category.position_id","left")
                                         ->join("(SELECT category_id AS pid, category_name AS pname FROM category)categorylanjutan", "categorylanjutan.pid=category.category_lanjutan", "left")
                                         ->join("store", "store.store_id=category.store_id", "left")
                                         ->where("category.store_id",session()->get("store_id"))
@@ -189,6 +212,7 @@
                                             <td><?= $no++; ?></td>
                                             <td><?= $usr->store_name; ?></td>
                                             <td><?= $unik[$usr->category_unique]; ?></td>
+                                            <td><?= $usr->position_name; ?></td>
                                             <td>
                                                 <?= $usr->category_name; ?>
                                                 <?php if($usr->category_lanjutan>0){?>

@@ -106,11 +106,11 @@ td{padding: 0px  10px 0px 10px  !important;}
                         </thead>
                         <tbody>
                             <?php
-                            $usr = $this->db
+                            $builder = $this->db
                             ->table("account")
-                            ->where("store_id",session()->get("store_id"))
-                            ->where("account_type","Debet")
-                            ->orderBy("account_sort", "ASC")
+                            ->where("account.store_id",session()->get("store_id"))
+                            ->where("account_type","Debet");
+                            $usr=$builder->orderBy("account_sort", "ASC")
                             ->get();
                             // echo $this->db->getLastquery();
                             $pemasukan=0;
@@ -118,10 +118,14 @@ td{padding: 0px  10px 0px 10px  !important;}
                                 $builder = $this->db
                                 ->table("kas")                                            
                                 ->select("SUM(kas_nominal)AS tnom")
+                                ->join("transaction","transaction.transaction_id=kas.transaction_id","left")
                                 ->join("store", "store.store_id=kas.store_id", "left")
                                 ->where("kas.account_id",$usr->account_id)
                                 ->where("kas.store_id",session()->get("store_id"))
                                 ->where("kas.kas_type",'masuk');
+                                if(session()->get("user_lapor")==1){
+                                    $builder->where("transaction_lapor","1");
+                                }
                                 if(isset($_GET["from"])&&$_GET["from"]!=""){
                                     $builder->where("kas.kas_date >=",$this->request->getGet("from"));
                                 }else{

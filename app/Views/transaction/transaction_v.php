@@ -67,18 +67,32 @@
     top:5px;
 }
 .disabled{opacity: 0.1;}
+.mb-10{margin-bottom:-10px;}
+.mb-20{margin-bottom:-20px;}
+.dot{
+  height: 15px!important;
+  width: 15px!important;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  position:relative;
+  left:0px;
+  top:0px;
+}
 </style>
 <script>
-function cekproductlanjutan(transaction_id){
+function cekproductlanjutan(transaction_id){ 
+    $("#tempscript").html("");
+    // alert("<?=base_url();?>/cekproductlanjutan?transaction_id="+transaction_id);    
     $.get("<?=base_url();?>/cekproductlanjutan",{transaction_id:transaction_id})
     .done(function(data){
         setTimeout(() => {
-            $("#tempscript").html(data);
+            $("#tempscript").html(data);  
         }, 500);        
     });
 }
 </script>
-<script id="tempscript"></script>
+<div id="tempscript"></div>
 
 <div class='container-fluid'>
     <div class='row'>
@@ -198,23 +212,71 @@ function cekproductlanjutan(transaction_id){
                                     <h4 class="modal-title">Pembayaran</h4>
                                 </div>
                                 <div class="modal-body">
-                                    <div>Tagihan : Rp. <span class="bill"></span></div>
-                                    <div>
-                                        <div class="form-group">
-                                        <label for="uang">Jumlah Uang:</label> &nbsp
-                                        <input onclick="fokus('bayar')" onkeyup="kembalian();" type="number" class="form-control" id="uang"> &nbsp
+                                    <div class="row">
+                                        <div class="col-7">
+                                            Tagihan : Rp. <span class="bill"></span>
                                         </div>
+                                        <div class="col-5">
+                                            <button id="btnpending" onclick="pendingbill();" type="button" class="btn btn-sm btn-warning">Pending Bill</button>  
+                                            <button id="btnbayar" onclick="bayarbill();" type="button" class="btn btn-sm btn-success">Bayar Bill</button>   
+                                        </div>
+                                    </div>
+                                    <div class="pt-3" id="pbill">
+                                        <div class="form-group">
+                                            <label for="transaction_pending">Penanggung:</label>
+                                            <select id="transaction_pending" class="form-control" >
+                                                <?php $user=$this->db->table("user")
+                                                ->where("store_id",session()->get("store_id"))
+                                                ->where("user_penanggung","1")
+                                                ->orderBy("user_name")->get();
+                                                foreach ($user->getResult() as $user) {
+                                                    if($user->user_id==2){$selected="selected";}else{$selected="";}?>                                                    
+                                                <option value="<?=$user->user_id;?>" <?=$selected;?>><?=$user->user_name;?></option>
+                                                <?php }?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="pt-3" id="bbill">
                                         <div class="form-group">
                                             <label for="account_id">Tipe Pembayaran:</label>
-                                            <select readonly id="account_id" class="form-control" >
-                                                <?php $account=$this->db->table("account")->orderBy("account_id")->get();
+                                            <select onchange="cekpembayaran();" id="account_id" class="form-control" >
+                                                <?php $account=$this->db->table("account")
+                                                ->where("store_id",session()->get("store_id"))
+                                                ->where("account_ispembayaran","1")
+                                                ->orderBy("account_id")->get();
                                                 foreach ($account->getResult() as $account) {
                                                     if($account->account_id==2){$selected="selected";}else{$selected="";}?>                                                    
                                                 <option value="<?=$account->account_id;?>" <?=$selected;?>><?=$account->account_name;?></option>
                                                 <?php }?>
                                             </select>
                                         </div>
-                                        <button onclick="pelunasan();" type="button" class="btn btn-primary">Submit</button>
+                                        <div class="form-group cash">
+                                            <label for="uang" class="bg-warning p-2">Cash:</label> &nbsp
+                                            <input onkeyup="rupiahnumerik(this);" change="kembalian('cash');" onclick="fokus('bayar')" type="number" class="form-control" ids="uang" id="cash" name="cash">
+                                            <script>rupiahnumerik($("#cash"))</script>
+                                        </div>
+                                        <div class="form-group nucard1">
+                                            <label for="nucard1" class="bg-success p-2">Card Number (1):</label> &nbsp
+                                            <input type="text" class="form-control" id="nucard1">
+                                        </div>
+                                        <div class="form-group nocard1">
+                                            <label for="nocard1">Nominal Card (1):</label> &nbsp
+                                            <input onkeyup="rupiahnumerik(this);" change="kembalian('nocard1');" onclick="fokus('bayar')" type="number" class="form-control" id="nocard1" name="nocard1">
+                                            <script>rupiahnumerik($("#nocard1"))</script>
+                                        </div>
+                                        <div class="form-group nucard2">
+                                            <label for="nucard2" class="bg-info p-2">Card Number (2):</label> &nbsp
+                                            <input type="text" class="form-control" id="nucard2">
+                                        </div>
+                                        <div class="form-group nocard2">
+                                            <label for="nocard2">Nominal Card (2):</label> &nbsp
+                                            <input onkeyup="rupiahnumerik(this);" change="kembalian('nocard2');" onclick="fokus('bayar')" type="number" class="form-control" id="nocard2" name="nocard2">
+                                            <script>rupiahnumerik($("#nocard2"))</script>
+                                        </div>
+                                    </div>
+                                    <div class="pt-3">
+                                        <input onchange="kembalian1('uang');" type="hidden" class="form-control" id="uang">
+                                        <button onclick="pelunasan();" type="button" class="btn btn-primary">Submit</button>   
                                     </div>
                                     <div>Pembayaran : Rp. <span class="dibayar"></span></div>
                                     <div>Kembalian : Rp. <span class="kembalian"></span></div>
@@ -225,6 +287,113 @@ function cekproductlanjutan(transaction_id){
                             </div>
                         </div>
                     </div>
+                    <script>
+                        function cekpembayaran(){
+                            let pembayaran=$("#account_id").val();
+                            $("#uang").val(0);
+                            $("#cash").val("0");
+                            $("#nocard1").val("0");
+                            $("#nocard2").val("0");
+                            $("#cash1").val("0");
+                            $("#nocard11").val("0");
+                            $("#nocard21").val("0");
+                            $(".nucard1").hide().val("");
+                            $(".nucard2").hide().val("");
+
+                            //cash
+                            if(pembayaran==101){
+                                $(".cash").show();
+                                $(".nucard1").hide().val("");
+                                $(".nocard1").hide().val("0");
+                                $(".nucard2").hide().val("");
+                                $(".nocard2").hide().val("0");
+                            }
+                            //card
+                            if(pembayaran==102){
+                                $(".cash").hide().val("0");
+                                $(".nucard1").show();
+                                $(".nocard1").show();
+                                $(".nucard2").hide().val("");
+                                $(".nocard2").hide().val("0");
+                            }
+                            //cash&card
+                            if(pembayaran==103){
+                                $(".cash").show();
+                                $(".nucard1").show();
+                                $(".nocard1").show();
+                                $(".nucard2").hide().val("");
+                                $(".nocard2").hide().val("0");
+                            }
+                            //card&card
+                            if(pembayaran==104){
+                                $(".cash").hide().val("0");
+                                $(".nucard1").show();
+                                $(".nocard1").show();
+                                $(".nucard2").show();
+                                $(".nocard2").show();
+                            }
+                        }
+                        cekpembayaran();                        
+                        
+                        function kembalian(bayar1){
+                            let pembayaran=$("#account_id").val();
+                            let uang = 0 ;
+                            let cash1 = parseInt($("#cash1").val());
+                            let nocard11 = parseInt($("#nocard11").val());
+                            let nocard21 = parseInt($("#nocard21").val());
+                            //cash
+                            if(pembayaran==101){
+                               uang = cash1;
+                            }
+                            //card
+                            if(pembayaran==102){
+                               uang = nocard11;                                
+                            }
+                            //cash&card
+                            if(pembayaran==103){
+                               uang = cash1+nocard11;                                 
+                            }
+                            //card&card
+                            if(pembayaran==104){
+                               uang = nocard11+nocard21;   
+                            }
+                            $("#uang").val(uang);
+                            setTimeout(() => {
+                                kembalian1('uang');
+                            }, 200);
+
+                        }
+
+                        function kembalian1(bayar1){
+                            let bayar = $("#"+bayar1+"").val();
+                            let tagihan = $("#tagihan").val();
+                            let kembalian = bayar-tagihan;
+                            $("#kembaliannya").val(kembalian);
+                            $("#bayarannya").val(bayar);
+                            // alert(kembalian);
+                            $(".dibayar").html(formatRupiah(bayar));
+                            $(".kembalian").html(formatRupiah(kembalian));
+                        }
+
+                        function pendingbill(){           
+                            $("#transaction_pending").val(0);
+                            $("#bbill").hide();
+                            $("#pbill").show();
+                            $("#penanggung").show();
+                            $("#btnpending").hide();
+                            $("#btnbayar").show();
+                        }
+
+                        function bayarbill(){                            
+                            $("#transaction_pending").val(0);
+                            $("#bbill").show();
+                            $("#pbill").hide();
+                            $("#penanggung").hide();
+                            $("#btnpending").show();
+                            $("#btnbayar").hide();
+                        }
+                        bayarbill();
+                    </script>
                     <div onclick="fokus('modalawal');" onfocusout="fokus('barcode');" class="modal " id="showmodalawal">                       
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -305,25 +474,82 @@ function cekproductlanjutan(transaction_id){
                                     <div>
                                         <div class="form-group mb-0">
                                             <label for="member_name" class="">Jml:</label>
-                                            <input type="number" class="form-control" placeholder="Masukkan Jumlah" id="qtyproduct" value="1"> &nbsp
+                                            <input onkeyup="rupiahnumerik(this);" type="number" class="form-control" placeholder="Masukkan Jumlah" id="qtyproduct" name="qtyproduct" value="1"> &nbsp
+                                            <!-- ID Produk -->
                                             <input id="qtyproduct_id" value="0" type="hidden"/>
+                                            <script>rupiahnumerik($("#qtyproduct"))</script>
                                         </div>
                                         <div class="form-group mb-0 hide" id="pstart">
                                             <label for="member_name" class="">Start:</label>
                                             <input type="datetime-local" class="form-control" id="start"> &nbsp
                                         </div>
 
-                                        <!-- <div class="form-group">
-                                            <label for="member_name" class="">Room:</label>
-                                            <select class="form-control" id="room">
-                                                <option value="">Pilih Room</option>
-                                                <?php $room=$this->db->table("room")->get();
-                                                foreach($room->getResult() as $room){?>
-                                                    <option value="<?=$room->room_id;?>"><?=$room->room_name;?></option>
+                                        <div class="form-group hide" id="ptherapist">
+                                            <label for="xtherapist" class="">Therapist:</label>
+                                            <select class="form-control" id="xtherapist">
+                                                <option value="">Pilih Therapist</option>
+                                                <?php $therapist=$this->db->table("category")
+                                                ->join("position","position.position_id=category.position_id","left")
+                                                ->join("user","user.position_id=position.position_id","left")
+                                                ->where("category.position_id >","0")
+                                                ->groupBy("user.user_id")
+                                                ->get();
+                                                foreach($therapist->getResult() as $xtherapist){?>
+                                                    <option value="<?=$xtherapist->user_id;?>"><?=$xtherapist->user_name;?></option>
                                                 <?php }?>
                                             </select>
-                                        </div> -->
+                                        </div>
+                                        <h2>Diskon</h2>
+                                        <div class="form-group mb-3">
+                                            <label for="xfoc" class="text-danger">FOC:</label>
+                                            <select onchange="focon()" class="form-control" id="xfoc">
+                                                <option value="0">Tidak</option>
+                                                <option value="1">Iya</option>
+                                            </select>
+                                            <script>
+                                                function focon(){
+                                                    let xfoci = $('#xfoc').val();
+                                                    if(xfoci==0){
+                                                        $('.nfoc').show();
+                                                    }else{
+                                                        $('.nfoc').hide();
+                                                    }
+                                                }
+                                                focon();
+                                            </script>
+                                        </div>
+                                        <div class="form-group mb-0 nfoc" id="pnominal">
+                                            <label for="xnominal" class="text-primary">Nominal:</label>
+                                            <input onkeyup="rupiahnumerik(this);" change="ceknomper('inom');" type="number" class="form-control" id="xnominal" name="xnominal"> &nbsp
+                                            <script>rupiahnumerik($("#xnominal"))</script>
+                                        </div>
+                                        <div class="form-group mb-0 nfoc" id="ppercent">
+                                            <label for="xpercent" class="text-primary">Persentase:</label>
+                                            <input onkeyup="rupiahnumerik(this);" change="ceknomper('iper');" type="number" class="form-control" id="xpercent" name="xpercent"> &nbsp
+                                            <script>rupiahnumerik($("#xpercent"))</script>
+                                        </div>
+                                        <script>
+                                            function ceknomper(tipe){
+                                                let inom = $('#xnominal').val();
+                                                let iper = $('#xpercent').val();
+                                                if(inom>0&&tipe=='inom'){
+                                                    $('#xpercent').val(0);
+                                                    $('#xfoc').val(0);
+                                                    $('#xpercent1').val(0);
+                                                    $('#xfoc1').val(0);
+                                                }
+                                                if(iper>0&&tipe=='iper'){
+                                                    $('#xnominal').val(0);
+                                                    $('#xfoc').val(0);
+                                                    $('#xnominal1').val(0);
+                                                    $('#xfoc1').val(0);
+                                                }
+                                            }
+                                            focon();
+                                        </script>
                                         
+                                        <input id="wajib" value="" type="hidden"/>
+                                        <input id="transactiond_id" value="0" type="hidden"/>
                                         <button onclick="insertnotaproduk();" type="button" class="btn btn-primary">Submit</button>
                                     </div>                               
                                 </div>
@@ -338,8 +564,8 @@ function cekproductlanjutan(transaction_id){
                             $("#from").val('<?=date("Y-m-d");?>');
                             $("#to").val('<?=date("Y-m-d");?>');
                         }
-                        function insertmember(transaction_id,member_id){ 
-                             $.get("<?=base_url("insertmember");?>",{transaction_id:transaction_id,member_id:member_id})
+                        function insertmember(transaction_id,member_id,customer_name){ 
+                             $.get("<?=base_url("insertmember");?>",{transaction_id:transaction_id,member_id:member_id,customer_name:customer_name})
                             .done(function(data){ 
                                 $("#showmember").modal('hide');
                                 nota(transaction_id);
@@ -481,7 +707,7 @@ function cekproductlanjutan(transaction_id){
                                     $("#fokus").val("cari"); 
                                 break;         
                                 case 'bayar':
-                                    $("#uang").focus();
+                                    // $("#uang").focus();
                                     $("#fokus").val("bayar"); 
                                 break;          
                                 case 'modalawal':
@@ -535,14 +761,57 @@ function cekproductlanjutan(transaction_id){
                             let transaction_pay=$("#bayarannya").val();
                             let transaction_change=$("#kembaliannya").val();
                             let shift=$("#kasshift").val();
-                            // $('#test').html('<?=base_url("pelunasan");?>?transaction_id='+transaction_id+"&transaction_bill="+transaction_bill+"&transaction_pay="+transaction_pay+"&transaction_change="+transaction_change+"&shift="+shift+"&transaction_no="+transaction_no);
-                            $.get("<?=base_url("pelunasan");?>",{account_id:account_id,transaction_id:transaction_id,transaction_bill:transaction_bill,transaction_pay:transaction_pay,transaction_change:transaction_change,shift:shift,transaction_no:transaction_no})
-                            .done(function(data){                                 
-                                updatestatus(transaction_id, data);
-                                print(transaction_id);                                
-                                $("#bayar").modal('hide');
-                                cekstatus(transaction_id);
-                                fokus('barcode');
+                            //metode pembayaran
+                            let transaction_nominalcash=$("#cash1").val();
+                            let transaction_numbercard1=$("#nucard1").val();
+                            let transaction_nominalcard1=$("#nocard11").val();
+                            let transaction_numbercard2=$("#nucard2").val();
+                            let transaction_nominalcard2=$("#nocard21").val();
+
+                            let transaction_pending=$("#transaction_pending").val();
+                            
+
+                            /* $("#test").html("<?=base_url("pelunasan");?>?account_id="+account_id
+                            +"&transaction_id="+transaction_id
+                            +"&transaction_bill="+transaction_bill
+                            +"&transaction_pay="+transaction_pay
+                            +"&transaction_change="+transaction_change
+                            +"&shift="+shift
+                            +"&transaction_no="+transaction_no
+                            +"&transaction_nominalcash="+transaction_nominalcash
+                            +"&transaction_numbercard1="+transaction_numbercard1
+                            +"&transaction_nominalcard1="+transaction_nominalcard1
+                            +"&transaction_numbercard2="+transaction_numbercard2
+                            +"&transaction_nominalcard2="+transaction_nominalcard2
+                            +"&transaction_pending="+transaction_pending); */
+                            // alert();
+                            
+                            $.get("<?=base_url("pelunasan");?>",{
+                                account_id:account_id,
+                                transaction_id:transaction_id,
+                                transaction_bill:transaction_bill,
+                                transaction_pay:transaction_pay,
+                                transaction_change:transaction_change,
+                                shift:shift,
+                                transaction_no:transaction_no,
+                                transaction_nominalcash:transaction_nominalcash,
+                                transaction_numbercard1:transaction_numbercard1,
+                                transaction_nominalcard1:transaction_nominalcard1,
+                                transaction_numbercard2:transaction_numbercard2,
+                                transaction_nominalcard2:transaction_nominalcard2,
+                                transaction_pending:transaction_pending
+                            })
+                            .done(function(data){       
+                                // alert(data); 
+                                setTimeout(() => {
+                                    updatestatus(transaction_id, data);
+                                    print(transaction_id);                                
+                                    $("#bayar").modal('hide');
+                                    cekstatus(transaction_id);
+                                    fokus('barcode');
+                                    bayarbill();
+                                }, 200);                         
+                                
                             });
                         }
                         function formatRupiah(num){
@@ -564,16 +833,6 @@ function cekproductlanjutan(transaction_id){
                             formatted = output.reverse().join("");
                             return("" + formatted + ((parts) ? "." + parts[1].substr(0, 2) : ""));
                         };
-                        function kembalian(){
-                            let uang = $("#uang").val();
-                            let tagihan = $("#tagihan").val();
-                            let kembalian = uang-tagihan;
-                            $("#kembaliannya").val(kembalian);
-                            $("#bayarannya").val(uang);
-                            // alert(kembalian);
-                            $(".dibayar").html(formatRupiah(uang));
-                            $(".kembalian").html(formatRupiah(kembalian));
-                        }
                         function closebayar(){
                             $("#bayar").hide();
                         }
@@ -582,6 +841,7 @@ function cekproductlanjutan(transaction_id){
                             fokus('bayar');
                             let tagihan = $("#tagihan").val();
                             $(".bill").html(formatRupiah(tagihan));  
+                            cekpembayaran();
                         }
                         function cariproduk(){
                             let product_name=$("#cariproduk").val();
@@ -598,20 +858,30 @@ function cekproductlanjutan(transaction_id){
                             plistproduct(typelist,'');
                         }
                         function plistproduct(type,product_name){
+                            cekprodukuniq();
+                            let transaction_id=$("#transaction_id").val();
                             if(type=="gambar"){
                                 // alert("<?=base_url("listproductgambar");?>?product_name="+product_name);
                                 $.get("<?=base_url("listproductgambar");?>",{product_name:product_name})
                                 .done(function(data1){
-                                    $("#listproduct").html(data1);
-                                    $("#typesearch").val("gambar");
+                                    setTimeout(function(){                                    
+                                        $("#listproduct").html(data1);
+                                        $("#typesearch").val("gambar");
+                                        cekproductlanjutan(transaction_id);                                
+                                    },100);
+                                    
                                 });
                             }
                             if(type=="list"){                                
                                 // alert("<?=base_url("listproductlist");?>?product_name="+product_name);
                                 $.get("<?=base_url("listproductlist");?>",{product_name:product_name})
                                 .done(function(data2){
-                                    $("#listproduct").html(data2);
-                                    $("#typesearch").val("list");
+                                    setTimeout(function(){                                    
+                                        $("#listproduct").html(data2);
+                                        $("#typesearch").val("list");
+                                        cekproductlanjutan(transaction_id);                                
+                                    },100);
+                                    
                                 });
                             }  
                             // fokus('barcode');                          
@@ -651,68 +921,135 @@ function cekproductlanjutan(transaction_id){
                             });
                         }
                         function insertnotaproduk(){
-                            let start = $("#start").val();
-                            let product_id = $("#qtyproduct_id").val();
-                            let transactiond_id = $("#transactiond_id").val();
-                            let qty = $("#qtyproduct").val();
-                            if(transactiond_id>0){
-                                updateqty(transactiond_id,'update',qty,start);
-                            }else{
-                                insertnotaqty(product_id,qty,start);
+                            let wajib = $("#wajib").val();
+                            let arwajib = wajib.split(",");
+                            let aman=1;
+                            let nwajib ;          
+                            let iwajib ; 
+                            let y; 
+                            let darwajib;  
+                            let z; 
+
+                            for(let x=1;x<arwajib.length;x++){
+                                y = arwajib[x];                                
+                                darwajib = y.split("=");
+                                nwajib = darwajib[0];          
+                                iwajib = darwajib[1];               
+
+                                z = $("#"+iwajib).val();
+                                // alert(z);
+                                if(z==""||z==null){
+                                    toast('Info', nwajib+' Harus Diisi!');
+                                    aman=0;
+                                }
+                                // toast('Info', nwajib+' Harus Diisi!'+z);
                             }
                             
-                            $("#jmlnota").modal("hide");
-                            $("#pstart").addClass("hide");
-                            $("#qtyproduct").val(1);
-                            
+                            if(aman==1){
+                                let product_id = $("#qtyproduct_id").val();
+                                let transactiond_id = $("#transactiond_id").val();
+                                let qty = $("#qtyproduct1").val();
+                                if(transactiond_id>0){
+                                    updateqty(transactiond_id,'update',qty);
+                                }else{
+                                    insertnotaqty();
+                                }
+                                
+                                $("#jmlnota").modal("hide");
+                                $("#ptamu").addClass("hide");
+                                $("#pstart").addClass("hide");
+                                $("#ptherapist").addClass("hide");
+                                $("#qtyproduct").val(1);
+                            }
                         }
                         function modalbackdrop(){
                                 $(".modal-backdrop").attr("style","display: inline !important;");
                         }
-                        function insertjmlnota(product_id,start){
+                        function insertjmlnota(transactiond_id,qtyproduct,product_id,start,therapist,xstart,xtherapist,xfoc,xnominal,xpercent){
+                            let wajib=$("#wajib").val();
                             if($("#transaction_id").val()>0){
                                 $("#jmlnota").modal();
                                 if(start==1){
+                                    $("#ptamu").removeClass("hide");
                                     $("#pstart").removeClass("hide");
+                                    $("#wajib").val(wajib+",Start=start");
+                                    wajib=$("#wajib").val();
                                 }else{
+                                    $("#ptamu").addClass("hide");
                                     $("#pstart").addClass("hide");
+                                    wajib = wajib.replace(",Start=start", "");
+                                    $("#wajib").val(wajib);
+                                    wajib=$("#wajib").val();                                    
+                                }
+                                if(therapist==1){
+                                    $("#ptherapist").removeClass("hide");
+                                    $("#wajib").val(wajib+",Therapist=xtherapist");
+                                    wajib=$("#wajib").val();
+                                }else{
+                                    $("#ptherapist").addClass("hide");
+                                    wajib = wajib.replace(",Therapist=xtherapist", "");
+                                    $("#wajib").val(wajib);
+                                    wajib=$("#wajib").val();
                                 }
                                 modalbackdrop();
+                                $("#transactiond_id").val(transactiond_id);  
                                 $("#qtyproduct_id").val(product_id);  
+                                $("#qtyproduct").val(qtyproduct);  
+                                $("#xstart").val(xstart);  
+                                $("#xtherapist").val(xtherapist);  
+                                $("#xfoc").val(xfoc);  
+                                $("#xnominal").val(xnominal); 
+                                $("#xpercent").val(xpercent);  
+                                rupiahnumerik($("#qtyproduct"));
+                                rupiahnumerik($("#xnominal"));
+                                rupiahnumerik($("#xpercent"));
                                 fokus('insertqty');    
                             }else{
                                 toast('INFO >>>', 'Nota tidak ditemukan!');
                             }                     
                         }
+                           
                         //masukin product hanya multi qty
-                        function insertnotaqty(product_id,transactiond_qty,start){
+                        function insertnotaqty(){
                             let transaction_id = $("#transaction_id").val();
-                            let transactiond_id = $("#transactiond_id").val();
+                            let product_id = $("#qtyproduct_id").val();
+                            let transactiond_qty = $("#qtyproduct").val();
+                            let start = $("#start").val();
+                            let xtherapist = $("#xtherapist").val();
+                            let xfoc = $("#xfoc").val();
+                            let xnominal = $("#xnominal1").val();
+                            let xpercent = $("#xpercent1").val();
                             $("#transactiond_id").val(0);
-                            // alert("<?=base_url("insertnota");?>?transaction_id="+transaction_id+"&transactiond_id="+transactiond_id+"&product_id="+product_id+"&transactiond_qty="+transactiond_qty+"&transactiond_start="+start);
-                            $.get("<?=base_url("insertnota");?>",{transaction_id:transaction_id,transactiond_id:transactiond_id,product_id:product_id,transactiond_qty:transactiond_qty,transactiond_start:start})
+                            // $("#test").html("<?=base_url("insertnota");?>?transaction_id="+transaction_id+"&product_id="+product_id+"&transactiond_qty="+transactiond_qty+"&start="+start+"&xtherapist="+xtherapist+"&xfoc="+xfoc+"&xnominal="+xnominal+"&xpercent="+xpercent);
+                            $.get("<?=base_url("insertnota");?>",{transaction_id:transaction_id,product_id:product_id,transactiond_qty:transactiond_qty,start:start,xtherapist:xtherapist,xfoc:xfoc,xnominal:xnominal,xpercent:xpercent})
                             .done(function(data){
                                 // alert(data);
-                                listnota($("#listnotastatus").val());
-                                nota(transaction_id);                                
-                                refreshlistproduct();                                
-                                $("#start").val("");
-                                cekproductlanjutan(transaction_id);
+                                setTimeout(() => {
+                                    listnota($("#listnotastatus").val());
+                                    nota(transaction_id);                                
+                                    refreshlistproduct();                                
+                                    $("#start").val("");
+                                    cekproductlanjutan(transaction_id);                                    
+                                }, 100);
                             });
-                        }
+                        } 
                         //masukin product hanya satu pcs
-                        function insertnota(product_id){
+                       /*  function insertnota(product_id){
                             let transaction_id = $("#transaction_id").val();
-                            // alert("<?=base_url("insertnota");?>?transaction_id="+transaction_id+"&product_id="+product_id);
+                            let start = $("#start").val();
+                            let therapist = $("#therapist").val();
+                            let foc = $("#foc").val();
+                            let nominal = $("#nominal").val();
+                            let percent = $("#percent").val();
+                            let customer_name = $("#customer_name").val();
+                            alert("<?=base_url("insertnota");?>?transaction_id="+transaction_id+"&product_id="+product_id);
                             $.get("<?=base_url("insertnota");?>",{transaction_id:transaction_id,product_id:product_id})
                             .done(function(data){
-                                // alert(data);
                                 listnota($("#listnotastatus").val());
-                                nota(transaction_id);
-                                
+                                nota(transaction_id);                                
                                 refreshlistproduct();
                             });
-                        }
+                        } */
                         function insertnotabarcode(product_batch){
 
                             let transaction_id = $("#transaction_id").val();
@@ -731,10 +1068,12 @@ function cekproductlanjutan(transaction_id){
                                 $.get("<?=base_url("deletenota");?>",{transaction_id:transaction_id})
                                 .done(function(data){
                                     // alert(data);
-                                    listnota($("#listnotastatus").val());
-                                    nota(transaction_id);
-                                    refreshlistproduct();
-                                    cekproductlanjutan(transaction_id);
+                                    setTimeout(function(){ 
+                                        listnota($("#listnotastatus").val());
+                                        nota(transaction_id);
+                                        refreshlistproduct();
+                                        cekproductlanjutan(transaction_id); 
+                                    },100);
                                 });
                             }
                         }
@@ -746,19 +1085,31 @@ function cekproductlanjutan(transaction_id){
                                 cekstatus(transaction_id);
                             });
                         }
-                        function updateqty(transactiond_id, type, transactiond_qty, start){                
-                            $.get("<?=base_url("updateqty");?>",{transactiond_id:transactiond_id,type:type,transactiond_qty:transactiond_qty,transactiond_start:start})
+                        function updateqty(transactiond_id, type, transactiond_qty){  
+                            let start = $("#start").val();
+                            let xtherapist = $("#xtherapist").val();
+                            let xfoc = $("#xfoc").val();
+                            let xnominal = $("#xnominal1").val();
+                            let xpercent = $("#xpercent1").val();
+                            let transaction_id = $("#transaction_id").val();
+                            // $("#test").html("<?=base_url("updateqty");?>?transactiond_id="+transactiond_id+"&type="+type+"&transactiond_qty="+transactiond_qty+"&start="+start+"&xtherapist="+xtherapist+"&xfoc="+xfoc+"&xnominal="+xnominal+"&xpercent="+xpercent+"&transaction_id="+transaction_id);           
+                            $.get("<?=base_url("updateqty");?>",{transactiond_id:transactiond_id,type:type,transactiond_qty:transactiond_qty,start:start,xtherapist:xtherapist,xfoc:xfoc,xnominal:xnominal,xpercent:xpercent,transaction_id:transaction_id})
                             .done(function(data){
                                 // alert(data);
-                                listnota($("#listnotastatus").val());
-                                let transaction_id = $("#transaction_id").val();
-                                nota(transaction_id);
-                                updatestatus(transaction_id, 2);
-                                refreshlistproduct();
-                                $("#start").val("");                                
-                                cekproductlanjutan(transaction_id);
+                                setTimeout(function(){                                    
+                                    listnota($("#listnotastatus").val());
+                                    nota(transaction_id);
+                                    updatestatus(transaction_id, 2);
+                                    refreshlistproduct();
+                                    $("#start").val("");                                
+                                    cekproductlanjutan(transaction_id);                             
+                                },100);
+                                
                             });
                         }
+
+                        
+
                         function deletetransactiond(transaction_id,product_id,product_qty){
                             // alert("<?=base_url("deletetransactiond");?>?transactiond_id="+transactiond_id+"&product_id="+product_id+"&product_qty="+product_qty);
                             let ok = confirm(' you want to delete?');
@@ -767,11 +1118,14 @@ function cekproductlanjutan(transaction_id){
                                 $.get("<?=base_url("deletetransactiond");?>",{transaction_id:transaction_id,product_id:product_id,product_qty:product_qty})
                                 .done(function(data){
                                     // alert(data);
-                                    listnota($("#listnotastatus").val());
-                                    nota(transaction_id);
-                                    updatestatus(transaction_id, 2);
-                                    refreshlistproduct();
-                                    cekproductlanjutan(transaction_id);
+                                    setTimeout(function(){                                    
+                                        listnota($("#listnotastatus").val());
+                                        nota(transaction_id);
+                                        updatestatus(transaction_id, 2);
+                                        refreshlistproduct();
+                                        cekproductlanjutan(transaction_id);                         
+                                    },100);
+                                    
                                 });
                             }
                         }
@@ -870,6 +1224,12 @@ function cekproductlanjutan(transaction_id){
         $(".page-titles").hide();
         $("#inputbarcode").focus();
     }, 300);
+    setInterval(() => {
+        let typelist=$("#typesearch").val();
+        plistproduct(typelist,'');
+        let transaction_id = $("#transaction_id").val();
+        nota(transaction_id);
+    }, 60000);
     
 </script>
 

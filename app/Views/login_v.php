@@ -74,6 +74,31 @@
         .toast-body {
             min-height: 100px;
         }
+        .login100-form-btn-warning {
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -moz-box;
+            display: -ms-flexbox;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+            width: 100%;
+            height: 50px;
+            background-color: #DAA520;
+            border-radius: 25px;
+            font-family: Ubuntu-Bold;
+            font-size: 15px;
+            color: #fff;
+            line-height: 1.2;
+            text-transform: uppercase;
+            -webkit-transition: all 0.4s;
+            -o-transition: all 0.4s;
+            -moz-transition: all 0.4s;
+            transition: all 0.4s;
+            text-decoration:none!important;
+        }
+        .login100-form-btn-warning:hover {color:black;}
     </style>
 </head>
 
@@ -129,6 +154,11 @@
                         <button class="login100-form-btn">
                             Sign in
                         </button>
+                    </div>
+                    <div class="container-login100-form-btn mt-2">
+                        <a target="_blank" href="<?=base_url("display");?>" class="login100-form-btn-warning">
+                            STATUS ROOM
+                        </a>
                     </div>
                     <!--
 					<div class="flex-col-c p-t-170 p-b-40">

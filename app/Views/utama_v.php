@@ -199,41 +199,28 @@
 			.judul{font-weight:bold; font-size:13px;}
 			.subjudul1{font-weight:bold; font-size:12px; text-shadow:white 1px 1px 1px;}
 			.subjudul2{font-size:12px;}
+			.h25{height: 25px; }
+			.h50{height: 50px; }
+			.h100{height: 100px; }
 			</style>
-			<div class="row">
-				<?php $room = $this->db->table("product")
-				->join("category","category.category_id=product.category_id","left")
-                ->join("(SELECT product_lanjutan AS pid, product_name AS pname FROM product)productlanjutan", "productlanjutan.pid=product.product_id", "left")
-				->where("category_unique","1")
-				->where("product_lanjutan","0")
-				->orderBy("product_name", "ASC")
-				->get();
-				$status="secondary";
-				foreach($room->getResult() as $room){
-					if($room->transaction_id>0){
-						if(date("Y-m-d H:i:s")>=$room->product_bend && date("Y-m-d H:i:s")<=$room->product_end){
-							$status="danger";
-						}elseif(date("Y-m-d H:i:s")<$room->product_end){
-							$status="success";
-						}
-					}else{
-						$status="secondary";
-					}					
-				?>
-				<div class="col-lg-2  rounded">
-					<div class="room rounded">
-						<div class="carddeckbg bg-<?=$status;?> inherit rounded">
-						</div>
-						<div class="carddeck rounded">
-							<div class="text rounded p-1 text-center">
-								<div class="judul"><?=$room->product_name;?></div>
-								<div class="subjudul1 text-<?=$status;?>"><?=$room->customer_name;?></div>
-							</div>
-						</div>
-					</div>`
-				</div>
-				<?php }?>
+			<div class="row" id="room">
+				<?php ?>
 			</div>
+			<script>
+				function room(){
+					$.get("<?=base_url("room");?>")
+					.done(function(data){
+						$("#room").html(data);
+					});
+				}
+				room();
+				function roomstatus(product_id,product_status){
+					$.get("<?=base_url("roomstatus");?>",{product_id:product_id,product_status:product_status})
+					.done(function(data){
+						room();
+					});
+				}
+			</script>
 		</div>
 	</div>
 </div>

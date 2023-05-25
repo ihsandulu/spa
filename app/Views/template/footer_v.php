@@ -75,6 +75,15 @@
         
     }
 
+    
+    function cekprodukuniq(){
+        // alert('<?=base_url("api/cekprodukuniq");?>');
+        $.get("<?=base_url("api/cekprodukuniq");?>")
+        .done(function(data){
+            
+        });
+    }
+
 
     $(document).ready(function() {
         $('.dtable').DataTable();
@@ -90,6 +99,11 @@
                 "height": "48px"
             });
         }, 200);
+
+        
+        setTimeout(() => {
+            cekprodukuniq();
+        }, 60000);
     });
 </script>
 <script>

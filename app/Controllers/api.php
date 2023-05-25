@@ -406,4 +406,94 @@ class api extends baseController
             <option value="<?= $cash->cash_id; ?>" <?= ($cash_id == $cash->cash_id) ? "selected" : ""; ?>><?= $cash->cash_name; ?></option>
         <?php } ?>        
     <?php }
+
+    public function cekprodukuniq(){
+        $product=$this->db->table("product")
+        ->where("product_end <",date("Y-m-d H:i:s"))
+        ->get();
+        foreach($product->getResult() as $product){
+            // echo $product->product_name."<br/>";
+            $input["product_start"]=null;
+            $input["product_bend"]=null;
+            $input["product_end"]=null;
+            $input["transaction_id"]="0";
+            $input["customer_name"]="";
+            $where["product_id"]=$product->product_id;
+            $this->db->table("product")
+            ->update($input,$where);
+        }
+    }
+
+    public function upload(){
+    // $server="https://server/public/";
+    $server=base_url("/");
+    ?>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <?php
+        $transaction=$this->db->table("transaction")
+        ->where("transaction_upload","0")
+        ->get();
+        foreach($transaction->getResult() as $transaction){
+            $url=$server."api/tupload?";
+            $parameter="";
+            $no=0;
+           foreach ($this->db->getFieldNames('transaction') as $field) {
+                if($no==0){$dan="";$koma="";}else{$dan="&";$koma=",";}
+                $url.=$dan.$field."=".$transaction->$field;
+                $parameter.=$koma.$field.":".$transaction->$field;
+                $no++;
+            }
+            echo $url."<br/>";
+            ?>
+            <script>
+                $.get("<?=$server;?>api/tupload",{<?=$parameter;?>})
+                .done(function(data){
+                    if(data==1){
+                        $.get("<?=$server;?>/updatetransaction",{transaction_upload:data,transaction_id:<?=$transaction->transaction_id;?>})
+                        .done(function(data){
+
+                        });
+                    }
+                });
+            </script>
+            <?php
+        }
+    }
+
+    public function tupload(){
+        foreach ($this->request->getGet() as $e => $f) {
+            if ($e != 'create') {
+                $input[$e] = $this->request->getGet($e);
+            }
+        }
+
+        $builder = $this->db->table('transaction');
+        $builder->insert($input);
+        if($builder){
+            echo "1";
+        }else{
+            echo "0";
+        }
+        /* echo $this->db->getLastQuery();
+        die; */
+    }
+
+    public function updatetransaction(){
+        foreach ($this->request->getGet() as $e => $f) {
+            if ($e != 'transaction_id') {
+                $input[$e] = $this->request->getGet($e);
+            }
+        }
+
+        $where["transaction_id"] = $this->request->getGet("transaction_id");
+        $builder = $this->db->table('transaction');
+        $builder->update($input,$where);
+        if($builder){
+            echo "1";
+        }else{
+            echo "0";
+        }
+        /* echo $this->db->getLastQuery();
+        die; */
+    }
 }

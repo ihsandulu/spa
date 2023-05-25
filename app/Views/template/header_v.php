@@ -124,6 +124,7 @@ if ($this->session->get('user_id') == "") {
             scrollbar-width: none;  /* Firefox */
         }
         .hide{display: none !important;}
+        .borderbawah{border:none; border-bottom: 1px dotted blue;}
     </style>
     
 

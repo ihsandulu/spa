@@ -16,9 +16,10 @@ class mcategory_m extends core_m
         } else {
             $categoryd["category_id"] = -1;
         }
-            $categoryd["store_id"] = session()->get("store_id");
+            $categoryd["category.store_id"] = session()->get("store_id");
         $us = $this->db
             ->table("category")
+            ->join("position","position.position_id=category.position_id","left")
             ->getWhere($categoryd);
         /* echo $this->db->getLastquery();
         die; */
@@ -30,9 +31,17 @@ class mcategory_m extends core_m
                         $data[$field] = $category->$field;
                     }
                 }
+                foreach ($this->db->getFieldNames('position') as $field) {
+                    if (!in_array($field, $larang)) {
+                        $data[$field] = $category->$field;
+                    }
+                }
             }
         } else {
             foreach ($this->db->getFieldNames('category') as $field) {
+                $data[$field] = "";
+            }
+            foreach ($this->db->getFieldNames('position') as $field) {
                 $data[$field] = "";
             }
         }

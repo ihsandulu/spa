@@ -77,9 +77,13 @@
                                     <?php
                                     $builder = $this->db
                                     ->table("kas")
+                                    ->join("transaction","transaction.transaction_id=kas.transaction_id","left")
                                     ->join("store", "store.store_id=kas.store_id", "left")
                                     ->where("kas.store_id",session()->get("store_id"))
                                     ->where("kas.kas_type",'masuk');
+                                    if(session()->get("user_lapor")==1){
+                                        $builder->where("transaction_lapor","1");
+                                    }
                                     if(isset($_GET["from"])&&$_GET["from"]!=""){
                                         $builder->where("kas.kas_date >=",$this->request->getGet("from"));
                                     }else{

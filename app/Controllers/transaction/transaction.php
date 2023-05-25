@@ -347,7 +347,6 @@ class transaction extends baseController
 
     public function insertnota(){
         $transaction_id=$this->request->getGet("transaction_id");
-        $transactiond_start=$this->request->getGet("transactiond_start");
 
        
         $builder=$this->db->table("product")
@@ -356,32 +355,89 @@ class transaction extends baseController
             $product_id=$this->request->getGet("product_id");
             $product=$builder->where("product_id",$product_id);
         }
+
+        //insert via barcode
         if(isset($_GET["product_batch"])){
             $product_batch=$this->request->getGet("product_batch");
             $product=$builder->where("product_batch",$product_batch);
         }
-        $transactiond_qty=1;
+        
         if(isset($_GET["transactiond_qty"])){
             $transactiond_qty=$this->request->getGet("transactiond_qty");
+        }else{
+            $transactiond_qty=1;
         }
+        
+        // produk berdurasi
+        if(isset($_GET["start"])){
+            $start=$this->request->getGet("start");
+        }else{
+            $start="0000-00-00 00:00:00";
+        }
+
+        // produk terkait posisi
+        if(isset($_GET["xtherapist"])){
+            $therapist=$this->request->getGet("xtherapist");
+        }else{
+            $therapist="0";
+        }
+
+        // diskon
+        if(isset($_GET["xfoc"])){
+            $foc=$this->request->getGet("xfoc");
+        }else{
+            $foc="0";
+        }
+        if(isset($_GET["xnominal"])){
+            $nominal=$this->request->getGet("xnominal");
+        }else{
+            $nominal="0";
+        }
+        if(isset($_GET["xpercent"])){
+            $percent=$this->request->getGet("xpercent");
+        }else{
+            $percent="0";
+        }
+
+        $message="";
+
+       
+
         $pro=$product->get();
         $sell=$pro->getRow()->product_sell;
-        if($pro->getNumRows()>0){
+        $transactiond_lanjutan=$pro->getRow()->product_lanjutan;
+        $transactiond_profittherapist=$pro->getRow()->product_profittherapist;
+        $transactiond_profittrainer=$pro->getRow()->product_profittrainer;
+        $transactiond_profitsales=$pro->getRow()->product_profitsales;
+        $product_id=$pro->getRow()->product_id;
+        $message.=$this->db->getLastQuery()."<br/>";
+
+        if($pro->getNumRows()>0){            
+
             $where["transaction_id"] = $transaction_id;
             $where["product_id"] = $pro->getRow()->product_id;
             $where["store_id"] = session()->get("store_id");
 
-            $transactiond_start=$transactiond_start;
+            //cek lanjutan
+            if($transactiond_lanjutan>0){
+                $prolanjutan=$this->db->table("transactiond")
+                ->where("product_id",$transactiond_lanjutan)
+                ->get();
+                foreach($prolanjutan->getResult() as $prolanjutan){
+                    $start=$prolanjutan->transactiond_end;
+                }
+            }
+
             $durasi=$pro->getRow()->product_durasi;
             $dbend=$pro->getRow()->product_dbend;
-            $transactiond_end=date("Y-m-d H:i:s",strtotime($transactiond_start." + ".$durasi." minute"));
-            $transactiond_bend=date("Y-m-d H:i:s",strtotime($transactiond_end." - ".$dbend." minute"));
-            
-
+            $transactiond_end=date("Y-m-d H:i:s",strtotime($start." + ".$durasi." minute"));
+            $transactiond_bend=date("Y-m-d H:i:s",strtotime($transactiond_end." - ".$dbend." minute"));            
+         
             $cari = $this->db->table('transactiond')
             ->where($where)
             ->get();
-            
+            $message.=$this->db->getLastQuery()."<br/>";
+
             $transactiond = $this->db->table('transactiond');
             if($cari->getNumRows()>0){
                 foreach ($cari->getResult() as $cari) {
@@ -389,10 +445,21 @@ class transaction extends baseController
                     $price=$cari->transactiond_price;
                     $input["transactiond_qty"] = $qty+$transactiond_qty;
                     $input["transactiond_price"] = $price+$sell;
-                    $input["transactiond_start"]=$transactiond_start;
+                    $input["transactiond_start"]=$start;
                     $input["transactiond_bend"]=$transactiond_bend;
                     $input["transactiond_end"]=$transactiond_end;
+                    $input["user_id"]=$therapist;
+                    $input["transactiond_foc"]=$foc;
+                    $input["transactiond_nominal"]=$nominal;
+                    $input["transactiond_percent"]=$percent;
+                
+                    $input["transactiond_lanjutan"]=$transactiond_lanjutan;
+                    $input["transactiond_profittherapist"]=$transactiond_profittherapist;
+                    $input["transactiond_profittrainer"]=$transactiond_profittrainer;
+                    $input["transactiond_profitsales"]=$transactiond_profitsales;
+
                     $transactiond->update($input,$where);
+                    $message.=$this->db->getLastQuery()."<br/>";
 
                     if($pro->getRow()->product_type==0||$pro->getRow()->category_unique==1){
                         $where1["product_id"] = $pro->getRow()->product_id;
@@ -409,6 +476,7 @@ class transaction extends baseController
                             $input1["product_end"] = $transactiond_end;
                         }
                         $product->update($input1,$where1);
+                        $message.=$this->db->getLastQuery()."<br/>";
                     }
                 }
             }else{
@@ -416,11 +484,23 @@ class transaction extends baseController
                 $where["transactiond_qty"] = $transactiond_qty;
                 // $where["room_id"] = $room_id;
                 $where["transactiond_price"] = $sell*$transactiond_qty;
-                $where["transactiond_start"]=$transactiond_start;
+                $where["transactiond_start"]=$start;
                 $where["transactiond_bend"]=$transactiond_bend;
                 $where["transactiond_end"]=$transactiond_end;
+                $where["user_id"]=$therapist;
+                $where["transactiond_foc"]=$foc;
+                $where["transactiond_nominal"]=$nominal;
+                $where["transactiond_percent"]=$percent;
+                
+                $where["transactiond_lanjutan"]=$transactiond_lanjutan;
+                $where["transactiond_profittherapist"]=$transactiond_profittherapist;
+                $where["transactiond_profittrainer"]=$transactiond_profittrainer;
+                $where["transactiond_profitsales"]=$transactiond_profitsales;
+
                 $transactiond->insert($where);
                 $transactiond_id = $this->db->insertID();
+                $data["message"] = $this->db->getLastQuery();
+                $message.=$this->db->getLastQuery()."<br/>";
 
                 if($pro->getRow()->product_type==0||$pro->getRow()->category_unique==1){
                     $where1["product_id"] = $pro->getRow()->product_id;
@@ -437,10 +517,11 @@ class transaction extends baseController
                         $input1["product_end"] = $transactiond_end;
                     }
                     $product->update($input1,$where1);
+                    $message.=$this->db->getLastQuery()."<br/>";
                 }
             }
 
-            $data["message"] = $this->db->getLastQuery();
+            $data["message"] = $message;
             // $data["message"] = $transactiond_qty;
         }else{
             $data["message"] = 0;    
@@ -512,23 +593,77 @@ class transaction extends baseController
 
     public function updateqty(){
         $transactiond_id=$this->request->getGet("transactiond_id");
+        $transaction_id=$this->request->getGet("transaction_id");
         $type=$this->request->getGet("type");
         $transactiond_qty=$this->request->getGet("transactiond_qty");
         // $room_id=$this->request->getGet("room_id");
+
+        
+
+         //insert produk berdurasi
+        if(isset($_GET["start"])){
+            $start=$this->request->getGet("start");
+        }else{
+            $start="0000-00-00 00:00:00";
+        }
+
+        
+
+        //insert produk terkait posisi
+        if(isset($_GET["xtherapist"])){
+            $therapist=$this->request->getGet("xtherapist");
+        }else{
+            $therapist="0";
+        }
+
+        //insert diskon
+        if(isset($_GET["xfoc"])){
+            $foc=$this->request->getGet("xfoc");
+        }else{
+            $foc="0";
+        }
+        if(isset($_GET["xnominal"])){
+            $nominal=$this->request->getGet("xnominal");
+        }else{
+            $nominal="0";
+        }
+        if(isset($_GET["xpercent"])){
+            $percent=$this->request->getGet("xpercent");
+        }else{
+            $percent="0";
+        }
 
         $input["transactiond_id"] = $transactiond_id;
         //cek qty
         $transactiond = $this->db->table('transactiond')
         ->join("product","product.product_id=transactiond.product_id","left")
+        ->join("category","category.category_id=product.category_id","left")
         ->where($input)
         ->get();
         foreach ($transactiond->getResult() as $transactiond) {
+            //cek produk lanjutan   
+            $transactiond_lanjutan=$transactiond->product_lanjutan;
+            $transactiond_profittherapist=$transactiond->product_profittherapist;
+            $transactiond_profittrainer=$transactiond->product_profittrainer;
+            $transactiond_profitsales=$transactiond->product_profitsales;
+            
+            $parentnya=$this->db->table("transactiond")
+            ->where("transaction_id",$transaction_id)
+            ->where("product_id",$transactiond_lanjutan)
+            ->orderBy("transactiond_id","DESC")
+            ->limit(1)
+            ->get();
+            foreach($parentnya->getResult() as $parentnya){
+                $start=$parentnya->transactiond_end;
+            }            
+            $data["message"]=$start;
+
             $sell=$transactiond->product_sell*$transactiond_qty;
             $product_id=$transactiond->product_id;
         
             $qty=$transactiond->transactiond_qty;
             $price=$transactiond->transactiond_price;
-            // $data["message"] = $qty;
+            $data["message"] = $qty;
             if($type=="tambah"){
                 $qty+=$transactiond_qty;
                 $price+=$sell;
@@ -542,17 +677,40 @@ class transaction extends baseController
                 $price=$sell;
             }
 
+            $durasi=$transactiond->product_durasi*$qty;
+            $dbend=$transactiond->product_dbend;
+            $transactiond_end=date("Y-m-d H:i:s",strtotime($start." + ".$durasi." minute"));
+            $transactiond_bend=date("Y-m-d H:i:s",strtotime($transactiond_end." - ".$dbend." minute"));
+
             $input2["transactiond_qty"] = $qty;
             $input2["transactiond_price"] = $price;
+            $input2["transactiond_start"]=$start;
+            $input2["transactiond_bend"]=$transactiond_bend;
+            $input2["transactiond_end"]=$transactiond_end;
+            $input2["user_id"]=$therapist;
+            $input2["transactiond_foc"]=$foc;
+            $input2["transactiond_nominal"]=$nominal;
+            $input2["transactiond_percent"]=$percent;            
+                
+            $input2["transactiond_lanjutan"]=$transactiond_lanjutan;
+            $input2["transactiond_profittherapist"]=$transactiond_profittherapist;
+            $input2["transactiond_profittrainer"]=$transactiond_profittrainer;
+            $input2["transactiond_profitsales"]=$transactiond_profitsales;
+
             // $input2["room_id"] = $room_id;
             $where2["transactiond_id"] = $transactiond_id;
             $builder = $this->db->table('transactiond');
             $builder->update($input2,$where2);
-            // $data["message"] = $this->db->getLastQuery();
+            $data["message"] = $this->db->getLastQuery();
 
-            $data["message"] = $transactiond_id;
-            if($transactiond->product_type==0){
-                $wherep["product_id"] = $product_id;
+            // $data["message"] = $transactiond_id;
+            if($transactiond->product_type==0||$transactiond->category_unique==1){
+                if($transactiond_lanjutan>0){
+                    $proid=$transactiond_lanjutan;
+                }else{
+                    $proid=$product_id;
+                }
+                $wherep["product_id"] = $proid;
                 $product = $this->db->table('product');
                 $product_stock=$product->getWhere($wherep)->getRow()->product_stock;
                 if($type=="tambah"){                
@@ -565,9 +723,15 @@ class transaction extends baseController
                     $product_stock=$product_stock+$transactiond->transactiond_qty-$transactiond_qty;
                 }
                 $inputp["product_stock"] = $product_stock;
+                
+                if($transactiond->category_unique==1){
+                    $inputp["product_bend"] = $transactiond_bend;
+                    $inputp["product_end"] = $transactiond_end;
+                }
+
                 $product->update($inputp,$wherep);
                 // $data["message"] = $this->db->getLastQuery();
-            }
+            }          
         }
         echo $data["message"];
     }
@@ -580,30 +744,72 @@ class transaction extends baseController
         $transaction_pay = $this->request->getGet("transaction_pay");
         $transaction_change = $this->request->getGet("transaction_change");
         $kas_shift = $this->request->getGet("shift");
-        $transaction_status=0;
+        
+        //metodepembayaran   
+        $transaction_nominalcash = $this->request->getGet("transaction_nominalcash");
+        $transaction_numbercard1 = $this->request->getGet("transaction_numbercard1");
+        $transaction_nominalcard1 = $this->request->getGet("transaction_nominalcard1");
+        $transaction_numbercard2 = $this->request->getGet("transaction_numbercard2");
+        $transaction_nominalcard2 = $this->request->getGet("transaction_nominalcard2");
+
+        $transaction_pending = $this->request->getGet("transaction_pending");
+        if($transaction_pending>0){
+            $transaction_status=2;
+        }else{
+            $transaction_status=0;
+        }
+        echo $transaction_status;
+
+
+        
 
         $input["transaction_bill"]=$transaction_bill;
         $input["transaction_pay"]=$transaction_pay;
         $input["transaction_change"]=$transaction_change;
         $input["transaction_status"]=$transaction_status;
         $input["account_id"]=$account_id;
+        //metodepembayaran        
+        $input["transaction_nominalcash"]=$transaction_nominalcash;
+        $input["transaction_numbercard1"]=$transaction_numbercard1;
+        $input["transaction_nominalcard1"]=$transaction_nominalcard1;
+        $input["transaction_numbercard2"]=$transaction_numbercard2;
+        $input["transaction_nominalcard2"]=$transaction_nominalcard2;
+
+        $input["transaction_pending"]=$transaction_pending;
 
         $this->db->table("transaction")
         ->where("transaction_id",$transaction_id)
         ->update($input);
-        echo 0;
+        // echo 0;
+        // echo $this->db->getLastQuery();
 
-        //insert kas
-        $input1["store_id"]=session()->get("store_id");
-        $input1["kas_shift"]= $kas_shift;
-        $input1["transaction_id"]= $transaction_id;
-        $input1["kas_nominal"]= $transaction_bill;
-        $input1["kas_type"]= 'masuk';
-        $input1["account_id"]= $account_id;
-        $input1["kas_description"]= "Pembayaran ".$transaction_no;
-        $input1["kas_date"]= date("Y-m-d");
-        $builder=$this->db->table("kas")
-        ->insert($input1);
+        //kas
+        $kas=$this->db->table("kas")
+        ->where("transaction_id",$transaction_id);
+        // ->get();
+        $jmlkas=$kas->countAllResults();
+        // echo $this->db->getLastQuery();die;
+        // echo $jmlkas;die;
+        if($jmlkas==0){
+            //insert kas
+            $input1["store_id"]=session()->get("store_id");
+            $input1["kas_shift"]= $kas_shift;
+            $input1["transaction_id"]= $transaction_id;
+            $input1["kas_nominal"]= $transaction_bill;
+            $input1["kas_type"]= 'masuk';
+            $input1["account_id"]= $account_id;
+            $input1["kas_description"]= "Pembayaran ".$transaction_no;
+            $input1["kas_date"]= date("Y-m-d");
+            $builder=$this->db->table("kas")
+            ->insert($input1);
+        }else{
+            $input1["account_id"]= $account_id;
+            $where1["transaction_id"]= $transaction_id;
+            $builder=$this->db->table("kas")
+            ->update($input1,$where1);
+
+        }
+        
 
         // echo $this->db->getLastQuery();
 
@@ -645,6 +851,15 @@ class transaction extends baseController
     }
 
 
+    public function tamu(){
+        $input["transaction_tamu"]=$this->request->getGet("transaction_tamu");
+        $where["transaction_id"]=$this->request->getGet("transaction_id");
+        $this->db->table("transaction")
+        ->update($input,$where);
+        // echo $this->db->getLastQuery();
+    }
+
+
     public function nota(){
         $transaction=$this->db->table("transaction")
         ->join("member","member.member_id=transaction.member_id","left")
@@ -653,10 +868,11 @@ class transaction extends baseController
         foreach ($transaction->getResult() as $transaction) {
             if($transaction->transaction_status==0){$iconprint="";}else{$iconprint="hide";}
         ?>
-        <div class="row">            
+        <div class="row"> 
             <div class="col-9">
                 NOTA : <i id="transactionno"><?=$transaction->transaction_no;?></i>
                 <?php if($transaction->member_id>0){?>( <?=$transaction->member_name;?> )<?php }?>
+                <input type="hidden" id="customer_name" value="<?=$transaction->member_name;?>"/>
             </div>
             <div class="col-3 text-right">
                 <button onclick="print(<?=$transaction->transaction_id;?>);" id="printicon" class="btn btn-warning btn-xs btn-right fa fa-print mb-2" type="button"></button>
@@ -677,21 +893,63 @@ class transaction extends baseController
                 <button onclick="deletenota(<?=$transaction->transaction_id;?>);" class="btn btn-danger btn-xs btn-right fa fa-close mb-2" type="button"></button>
                 <?php }?>
             </div>
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-1">
+                        <button id="btntamu" onclick="showtamu()" type="button" class="btn btn-sm btn-primary"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <div class="col-11">
+                        Nama Tamu : <input readonly class="form-group borderbawah" type="text" id="transaction_tamu" value="<?=$transaction->transaction_tamu;?>"/>
+                        <button onclick="hidetamu()" id="btntamuok" type="button" class="btn btn-sm btn-primary hide"><i class="fa fa-check"></i></button>
+                    </div>
+                    <script>
+                        function showtamu(){
+                            $("#transaction_tamu").removeAttr("readonly");
+                            $("#transaction_tamu").focus();
+                            $("#btntamuok").removeClass("hide");
+                            $("#btntamu").addClass("hide");
+                        }
+                        function hidetamu(){
+                            let transaction_tamu=$("#transaction_tamu").val();
+                            $("#transaction_tamu").attr("readonly","readonly");
+                            $("#btntamuok").addClass("hide");
+                            $("#btntamu").removeClass("hide");
+                            // alert("<?=base_url();?>/tamu?transaction_id=<?=$transaction->transaction_id;?>&transaction_tamu="+transaction_tamu);
+                            $.get("<?=base_url();?>/tamu",{transaction_id:<?=$transaction->transaction_id;?>,transaction_tamu:transaction_tamu})
+                            .done(function(data){
+                                // alert(data);
+                            });
+                        }
+                        $(window).ready(function() {
+                            $("#transaction_tamu").on("keyup", function (event) {
+                                var keyPressed = event.keyCode || event.which;
+                                if (keyPressed === 13) {
+                                    alert("Nama Tamu telah diupdate.");
+                                    hidetamu();
+                                    event.preventDefault();
+                                    return false;
+                                }
+                            });
+                        });
+                        </script>
+                </div>
+            </div>
         </div>
         <div>
             <input type="hidden" id="transaction_status" value="<?=$transaction->transaction_status;?>"/>
             <input type="hidden" id="transaction_id" value="<?=$transaction->transaction_id;?>"/>
-            <input type="hidden" id="transactiond_id" value="0"/>
+            <!-- <input type="hidden" id="transactiond_id" value="0"/> -->
             <input type="hidden" id="transaction_no" value="<?=$transaction->transaction_no;?>"/>
             <table id="" class="display nowrap table table-hover table-striped table-bordered" cellspacing="0" width="100%">
                 <thead class="">
                     <tr>
                         <th></th>
                         <th>No.</th>
-                        <th>Discount</th>
                         <th>Produk</th>
                         <th>Qty</th>
                         <th>Harga</th>
+                        <th>Discount</th>
+                        <th>Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -700,6 +958,7 @@ class transaction extends baseController
                         ->table("transactiond")
                         ->select("*,SUM(transactiond_qty)AS qty, SUM(transactiond_price)AS price, transactiond.transaction_id as transaction_id")
                         ->join("product", "product.product_id=transactiond.product_id", "left")
+                        ->join("user", "user.user_id=transactiond.user_id", "left")
                         ->join("category", "category.category_id=product.category_id", "left")
                         ->join("unit", "unit.unit_id=product.unit_id", "left")
                         ->where("product.store_id",session()->get("store_id"))
@@ -712,6 +971,19 @@ class transaction extends baseController
                     $tprice=0;
                     foreach ($usr->getResult() as $usr) { 
                         if($usr->product_durasi>0&&$usr->product_lanjutan==0){$start=1;}else{$start=0;}
+                        if($usr->position_id>0){$therapist=1;}else{$therapist=0;}
+                        if($usr->transactiond_foc>0){$diskon=$usr->transactiond_price;$kdis="FOC";}else 
+                        if($usr->transactiond_nominal>0){$diskon=$usr->transactiond_nominal;$kdis="Nominal";}else 
+                        if($usr->transactiond_percent>0){$diskon=$usr->transactiond_percent/100*$usr->transactiond_price;$kdis=$usr->transactiond_percent."%";}else 
+                        {$diskon=0;$kdis="";}
+
+                        if($usr->product_start==null){$usr->product_start="0000-00-00 00:00:00";}
+                        if($usr->user_id==null){$usr->user_id=0;}
+                        
+                        $qty=$usr->qty; 
+                        $price=$usr->price; 
+                        $stprice=$price-$diskon;
+                        $tprice+=$stprice; 
                         ?>
                         <tr class="">
                             <?php if (!isset($_GET["report"])) { ?>
@@ -730,18 +1002,29 @@ class transaction extends baseController
                                             && session()->get("halaman")['13']['act_delete'] == "1"
                                         )
                                     ) { ?>
-                                        <button class="btn btn-xs btn-danger delete m-2" onclick="deletetransactiond(<?= $usr->transaction_id; ?>,<?= $usr->product_id; ?>,<?= $usr->qty; ?>);" name="delete" value="OK"><span class="fa fa-close" style="color:white;"></span> </button>
+                                        <button id="del<?= $usr->transactiond_id; ?>" class="btn btn-xs btn-danger delete m-2" onclick="deletetransactiond(<?= $usr->transaction_id; ?>,<?= $usr->product_id; ?>,<?= $usr->qty; ?>);" name="delete" value="OK"><span class="fa fa-close" style="color:white;"></span> </button>
                                     <?php }?>
                                 </td>
                             <?php } ?>
                             <td class="text-small0"><?= $no++; ?></td>
-                            <td class="text-small0"></td>
-                            <td class="text-small0"><?= $usr->product_name; ?></td>
-                            <?php 
-                            $qty=$usr->qty; 
-                            $price=$usr->price; 
-                            $tprice+=$price; 
-                            ?>
+                            <td class="text-small0">
+                                <?php if($usr->product_durasi>0&&$usr->product_lanjutan==0){
+                                    $statusroom="secondary";
+                                    if(date("Y-m-d H:i:s")>$usr->product_start&&date("Y-m-d H:i:s")<$usr->product_bend){$statusroom="success";}
+                                    elseif(date("Y-m-d H:i:s")>=$usr->product_bend&&date("Y-m-d H:i:s")<=$usr->product_end){$statusroom="warning";}
+                                    else{
+                                        $statusroom="danger";
+                                    }
+                                    ?>
+                                    <div class="mb-10"><span class="bg-<?=$statusroom;?> dot spinner-grow" >&nbsp;</span> <?= $usr->product_name; ?></div>
+                                    <div class="mb-10 text-primary">Therapist:<?= $usr->user_name; ?></div>
+                                    <div class="text-secondary mb-10">(<b class="text-success">Start:</b> <?= $usr->product_start; ?>)</div>
+                                    <div class="text-secondary mb-10">(<b class="text-warning">Bend:</b> <?= $usr->product_bend; ?>)</div>
+                                    <div class="text-secondary m-0">(<b class="text-danger">End:</b> <?= $usr->product_end; ?>)</div>
+                                <?php }else{?>
+                                     <div class="mb-10"><?= $usr->product_name; ?></div>
+                                <?php }?>
+                            </td>                            
                             <td class="text-small0">
                                 <?php 
                                 if (
@@ -761,7 +1044,9 @@ class transaction extends baseController
                                     <i onclick="updateqty(<?= $usr->transactiond_id; ?>,'kurang','1')" class="fa fa-minus text-small text-danger pointer"></i> 
                                     <?php }?>
 
-                                    <button type="button" class="btn btn-xs btn-warning" onclick="insertjmlnota(<?= $usr->product_id; ?>,<?=$start;?>);$('#transactiond_id').val(<?= $usr->transactiond_id; ?>);$('#qtyproduct').val(<?= $qty; ?>);"> <?= number_format($qty,0,",",".") ?> <?= $usr->unit_name; ?> </button>
+                                    <button type="button" class="btn btn-xs btn-warning" onclick="insertjmlnota(<?= $usr->transactiond_id; ?>,<?= $qty; ?>,<?= $usr->product_id; ?>,<?=$start;?>,<?=$therapist;?>,'<?= $usr->product_start; ?>',<?= $usr->user_id; ?>,<?= $usr->transactiond_foc; ?>,<?= $usr->transactiond_nominal; ?>,<?= $usr->transactiond_percent; ?>);">
+                                     <?= number_format($qty,0,",",".") ?> <?= $usr->unit_name; ?> 
+                                    </button>
 
                                     <?php if(($usr->product_stock>0&&$usr->category_unique==0)||($usr->product_type==1&&$usr->category_unique==0)){?>
                                         <i onclick="updateqty(<?= $usr->transactiond_id; ?>,'tambah','1')" class="fa fa-plus text-small text-success pointer"></i>
@@ -771,17 +1056,19 @@ class transaction extends baseController
                                 <?php }?>   
                             </td>
                             <td class="text-small0"><?= number_format($price,0,",",".") ?></td>
+                            <td class="text-small0"><div style="font-size:10px; color:red; margin-bottom:0px;"><?=$kdis;?></div><?=number_format($diskon,0,",",".");?></td>
+                            <td class="text-small0"><?= number_format($stprice,0,",",".") ?></td>
                         </tr>
                     <?php } ?>
                     <tr>
-                        <th colspan="5">Total</th>
+                        <th colspan="6">Total</th>
                         <th>
                             <?= number_format($tprice,0,",","."); ?>
                             <input type="hidden" id="tagihan" value="<?=$tprice;?>"/>
                         </th>
                     </tr>
                     <tr>
-                        <th colspan="5">
+                        <th colspan="6">
                             <?php 
                             if (
                                 (
@@ -803,7 +1090,7 @@ class transaction extends baseController
                         <th class="dibayar"><?=$transaction->transaction_pay;?></th>
                     </tr>
                     <tr>
-                        <th colspan="5">
+                        <th colspan="6">
                             Kembalian          
                             <input type="hidden" id="kembaliannya" value="<?=$transaction->transaction_change;?>"/>
                             <input type="hidden" id="status" value="<?=$transaction->transaction_status;?>"/>
@@ -821,6 +1108,7 @@ class transaction extends baseController
         $builder = $this->db->table("product");        
         $builder->select("*,product.category_id as category_id");
         $builder->join("category","category.category_id=product.category_id","left");
+        $builder->join("(SELECT * FROM transaction WHERE transaction_status='2')transaction", "transaction.transaction_id=product.transaction_id", "left");
          if($this->request->getGet("product_name")!=""){
             $builder->like("product.product_name",$this->request->getGet("product_name"),"BOTH");
         }
@@ -836,6 +1124,7 @@ class transaction extends baseController
         $isiinsertnota ="";
         foreach ($product->getResult() as $product) {
             if($product->product_durasi>0&&$product->product_lanjutan==0){$start=1;}else{$start=0;}
+            if($product->position_id>0){$therapist=1;}else{$therapist=0;}
         ?>
         <?php 
         if (
@@ -852,8 +1141,7 @@ class transaction extends baseController
             )
         ) {
             if(($product->product_stock>0&&$product->product_type==0)||($product->product_type==1&&$product->product_lanjutan==0)){
-                // $insertnota = "insertnota(".$product->product_id.")";
-                $insertnota = "insertjmlnota(".$product->product_id.",".$start.")";
+                $insertnota = "insertjmlnota(0,1,".$product->product_id.",".$start.",".$therapist.",'0000-00-00 00:00:00',0,0,0,0)";
                 $disabled="";
             }elseif($product->product_lanjutan>0){
                 $insertnota = "toast('Info', 'Produk Induk Tidak Ditemukan!')";
@@ -862,13 +1150,23 @@ class transaction extends baseController
                 $insertnota = "toast('Info Stock', 'Stock Kosong!')";
                 $disabled="disabled";
             }
-            $isiinsertnota = "insertjmlnota(".$product->product_id.",".$start.")";
+
+            if($product->transaction_status==2&&$product->category_unique==1){$disabled="disabled";$insertnota = "toast('Info Status', 'Tidak Tersedia!')";}
+
+            $isiinsertnota = "insertjmlnota(0,1,".$product->product_id.",".$start.",".$therapist.",'0000-00-00 00:00:00',0,0,0,0)";
+
         }else{$insertnota =""; $disabled="disabled";}
         
         if($product->product_picture==""){
             $gambar="noimagespa.jpg";
         }else{
             $gambar=$product->product_picture;
+        }
+
+        if($product->product_lanjutan>0){
+            $blanjutan="blanjutan";
+        }else{
+           $blanjutan="";
         }
         ?>
         <?php if($product->category_id!=$category_id){?>
@@ -877,7 +1175,7 @@ class transaction extends baseController
         </div>
         <?php $category_id=$product->category_id;}?>
         <input type="hidden" class="ilanjutan<?=$product->product_lanjutan;?>" value="<?=$isiinsertnota;?>"/>
-        <div class="col-3 divimg_product <?=$disabled;?> planjutan<?=$product->product_lanjutan;?>" onclick="<?=$insertnota;?>" >
+        <div class="col-3 divimg_product <?=$disabled;?> <?=$blanjutan;?> planjutan<?=$product->product_lanjutan;?>" onclick="<?=$insertnota;?>" >
             <figure class="caption-1 pointer">
                 <img src="<?=base_url("images/product_picture/". $gambar);?>" alt="" class="w-100 card-img-top  img_product">
                 <figcaption class="px-5 py-4 text-center text-light">
@@ -908,6 +1206,7 @@ class transaction extends baseController
                     <?php
                     $builder = $this->db->table("product");
                     $usr1 = $builder->join("category", "category.category_id=product.category_id", "left")
+                        ->join("(SELECT * FROM transaction WHERE transaction_status='2')transaction", "transaction.transaction_id=product.transaction_id", "left")
                         ->join("unit", "unit.unit_id=product.unit_id", "left")
                         ->join("store", "store.store_id=product.store_id", "left")
                         ->where("product.store_id",session()->get("store_id"));
@@ -920,7 +1219,9 @@ class transaction extends baseController
                     // echo $this->db->getLastquery();
                     $no = 1;
                     foreach ($usr->getResult() as $usr) { 
+                        // if($usr->product_durasi>0&&$usr->product_lanjutan==0){$start=1;}else{$start=0;}
                         if($usr->product_durasi>0&&$usr->product_lanjutan==0){$start=1;}else{$start=0;}
+                        if($usr->position_id>0){$therapist=1;}else{$therapist=0;}
                     ?>
                     <?php 
                         if (
@@ -937,7 +1238,7 @@ class transaction extends baseController
                             )
                         ) {
                             if(($usr->product_stock>0&&$usr->product_type==0)||($usr->product_type==1&&$usr->product_lanjutan==0)){
-                                $insertnota = "insertjmlnota(".$usr->product_id.",".$start.")";
+                                $insertnota = "insertjmlnota(0,1,".$usr->product_id.",".$start.",".$therapist.",'0000-00-00 00:00:00',0,0,0,0)";
                                 $disabled="";
                             }elseif($usr->product_lanjutan>0){
                                 $insertnota = "toast('Info', 'Produk Induk Tidak Ditemukan!')";
@@ -946,6 +1247,9 @@ class transaction extends baseController
                                 $insertnota = "toast('Info Stock', 'Stock Kosong!')";
                                 $disabled="disabled";
                             }
+
+                            if($usr->transaction_status==2&&$usr->category_unique==1){$disabled="disabled";$insertnota = "toast('Info Status', 'Tidak Tersedia!')";}
+
                         }else{$insertnota ="";}?>
                         <tr class="pointer <?=$disabled;?> planjutan<?=$usr->product_lanjutan;?>" onclick="<?=$insertnota;?>">                            
                             <td><?= $usr->category_name; ?></td>
@@ -1018,7 +1322,7 @@ class transaction extends baseController
                         ?>
                         <td style="padding-left:0px; padding-right:0px;">
                             <form method="post" class="btn-action" style="">
-                                <button type="button" class="btn btn-sm btn-success" onclick="insertmember(<?= $transaction_id; ?>,<?= $usr->member_id; ?>)" ><span class="fa fa-check" style="color:white;"></span> </button>
+                                <button type="button" class="btn btn-sm btn-success" onclick="insertmember(<?= $transaction_id; ?>,<?= $usr->member_id; ?>,'<?= $usr->member_name; ?>')" ><span class="fa fa-check" style="color:white;"></span> </button>
                             </form>
                         </td>
                         <?php }?>
@@ -1043,6 +1347,12 @@ class transaction extends baseController
         ->update($input,$where);
         // echo $this->db->getLastQuery();
         echo $where["transaction_id"];
+
+        
+        $input1["customer_name"]=$this->request->getGet("customer_name");
+        $where1["transaction_id"]=$this->request->getGet("transaction_id");
+        $this->db->table("product")
+        ->update($input1,$where1);
     }
 
     public function cekproductlanjutan(){
@@ -1054,45 +1364,91 @@ class transaction extends baseController
         $totaldurasi = 0;
         $alert = array();
         $start = array();
+        $pchildren = array();
+        $delparent = array();
         $transactiond = array();
         
-        $product=$this->db->table("product")->get();
+        $product=$this->db->table("product")
+        ->where("product_lanjutan>0")
+        ->get();
         foreach($product->getResult() as $xproduct){
-            if($xproduct->product_lanjutan>0){
-                $lanjutan[]=$xproduct->product_lanjutan;
-            }
+            $lanjutan[]=$xproduct->product_lanjutan;
         }
-        $transactiond=$this->db->table("transactiond")
+        $stransactiond=$this->db->table("transactiond")
         ->join("product","product.product_id=transactiond.product_id","left")
         ->where("transactiond.transaction_id",$transaction_id)
         ->orderBy("product_lanjutan","ASC")
         ->get();
-        foreach($transactiond->getResult() as $xtransactiond){
+        foreach($stransactiond->getResult() as $xtransactiond){
             $produk[]=$xtransactiond->product_id;
             $transactiond[$xtransactiond->product_id]=$xtransactiond->transactiond_id;
             if($xtransactiond->product_durasi>0){
                 if($xtransactiond->product_lanjutan>0){
                     $durasi[$xtransactiond->product_lanjutan][]=$xtransactiond->product_durasi;
                     $alert[$xtransactiond->product_lanjutan] = $xtransactiond->product_dbend;
+                    $pchildren[]=$xtransactiond->product_lanjutan;
                 }else{
                     $durasi[$xtransactiond->product_id][]=$xtransactiond->product_durasi;
                     $parent[]=$xtransactiond->product_id;
                     $alert[$xtransactiond->product_id] = $xtransactiond->product_dbend;
                     $start[$xtransactiond->product_id] = $xtransactiond->transactiond_start;
+                    $delparent[$xtransactiond->product_id]=$xtransactiond->transactiond_id;
                 }
             }
         }
         // print_r($produk);
         // print_r($lanjutan);
+        $random=chr(rand(97,122));
+        $temp='
+        <script>
+        function '.$random.'(){
+            $(".blanjutan").addClass("disabled");
+            $(".blanjutan").removeAttr("onclick"); 
+        ';
         foreach($produk as $xproduk){                
             if(in_array($xproduk,$lanjutan)){
-                echo "
-                $('.planjutan".$xproduk."').removeClass('disabled');
-                let ilanjutan".$xproduk."=$('.ilanjutan".$xproduk."').val();
-                $('.planjutan".$xproduk."').attr('onclick',ilanjutan".$xproduk.");               
-                ";
+                $temp.= '       
+                setTimeout(function(){
+                    let myStr = $(".ilanjutan'.$xproduk.'").val();
+                    let strArray = myStr.split(",");
+                    let isiilanjutan = "";
+                    let koma = "";
+                    let isil = 0;
+                    for(let i = 0; i <= strArray.length; i++){
+                        if(i==3){
+                            isil=1;
+                        }else{
+                            isil=strArray[i];
+                        }
+                        if(i<strArray.length){
+                            koma=",";
+                        }else{
+                            koma="";
+                        }
+                        isiilanjutan+=isil+koma;
+                    }
+                    $(".planjutan'.$xproduk.'").removeClass("disabled");
+                    //$(".planjutan'.$xproduk.'").attr("onclick",isiilanjutan); 
+                    $(".planjutan'.$xproduk.'").attr("onclick",$(".ilanjutan'.$xproduk.'").val()); 
+                    // alert($(".ilanjutan'.$xproduk.'").val());   
+                    // alert("ada='.$xproduk.'"); 
+                    //alert(isiilanjutan);
+                    
+                },200);                            
+                ';
             }
         }
+        foreach($pchildren as $xpchildren){ 
+            $temp.= '                 
+                $("#del'. $delparent[$xpchildren].'").hide();       
+            ';
+        }
+        $temp.='}        
+        $("#'.$random.'").click();       
+        </script>
+        <input type="button" id="'.$random.'" onclick="'.$random.'()" class="hide"/>
+        ';
+        echo $temp;
         foreach($parent as $xparent){
             $totaldurasi = 0;
             $pid=$xparent;
@@ -1103,6 +1459,7 @@ class transaction extends baseController
             $ingat = date("Y-m-d H:i:s", strtotime($akhir." - ".$peringatan." minute"));
             $transactiondid = $transactiond[$pid];
              
+            $input["product_start"]=$awal;
             $input["product_end"]=$akhir;
             $input["product_bend"]=$ingat;
             $input["transaction_id"]=$transaction_id;
@@ -1110,12 +1467,12 @@ class transaction extends baseController
             $this->db->table("product")
             ->update($input,$where);
              
-            $input["transactiond_start"]=$awal;
-            $input["transactiond_end"]=$akhir;
-            $input["transactiond_bend"]=$ingat;
-            $where["transactiond_id"]=$transactiondid;
+           /*  $input1["transactiond_start"]=$awal;
+            $input1["transactiond_end"]=$akhir;
+            $input1["transactiond_bend"]=$ingat;
+            $where1["transactiond_id"]=$transactiondid;
             $this->db->table("transactiond")
-            ->update($input,$where);
+            ->update($input1,$where1); */
         }
     }
 

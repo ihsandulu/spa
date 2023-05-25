@@ -10,32 +10,7 @@ class rtransaction_m extends core_m
     {
         $data = array();
         $data["message"] = "";
-        //cek transaction
-        if ($this->request->getVar("transaction_id")) {
-            $transactiond["transaction_id"] = $this->request->getVar("transaction_id");
-        } else {
-            $transactiond["transaction_id"] = -1;
-        }
-            $transactiond["store_id"] = session()->get("store_id");
-        $us = $this->db
-            ->table("transaction")
-            ->getWhere($transactiond);
-        /* echo $this->db->getLastquery();
-        die; */
-        $larang = array("log_id", "id", "user_id", "action", "data", "transaction_id_dep", "trx_id", "trx_code");
-        if ($us->getNumRows() > 0) {
-            foreach ($us->getResult() as $transaction) {
-                foreach ($this->db->getFieldNames('transaction') as $field) {
-                    if (!in_array($field, $larang)) {
-                        $data[$field] = $transaction->$field;
-                    }
-                }
-            }
-        } else {
-            foreach ($this->db->getFieldNames('transaction') as $field) {
-                $data[$field] = "";
-            }
-        }
+        
 
         
 
@@ -87,6 +62,42 @@ class rtransaction_m extends core_m
             $data["message"] = "Update Success";
             //echo $this->db->last_query();die;
         }
+
+        //update
+        if (isset($_POST["transaction_lapor"])) {
+            $input["transaction_lapor"] = $this->request->getPost("transaction_lapor");
+            $this->db->table('transaction')->update($input, array("transaction_id" => $this->request->getPost("transaction_id")));
+            $data["message"] = "Update Success";
+            // echo $this->db->last_query();die;
+        }
+
+        //cek transaction
+        if ($this->request->getVar("transaction_id")) {
+            $transactiond["transaction_id"] = $this->request->getVar("transaction_id");
+        } else {
+            $transactiond["transaction_id"] = -1;
+        }
+            $transactiond["store_id"] = session()->get("store_id");
+        $us = $this->db
+            ->table("transaction")
+            ->getWhere($transactiond);
+        /* echo $this->db->getLastquery();
+        die; */
+        $larang = array("log_id", "id", "user_id", "action", "data", "transaction_id_dep", "trx_id", "trx_code");
+        if ($us->getNumRows() > 0) {
+            foreach ($us->getResult() as $transaction) {
+                foreach ($this->db->getFieldNames('transaction') as $field) {
+                    if (!in_array($field, $larang)) {
+                        $data[$field] = $transaction->$field;
+                    }
+                }
+            }
+        } else {
+            foreach ($this->db->getFieldNames('transaction') as $field) {
+                $data[$field] = "";
+            }
+        }
+
         return $data;
     }
 }

@@ -39,7 +39,7 @@
     .tebal12{font-size:52px; font-weight:bold;}	
     .tebal14{font-size:54px; font-weight:bold;}	
     .tebal16{font-size:56px; font-weight:bold;}		
-    th, td{padding:0px 1px 0px 1px; font-size:50px; line-height: 100% !important;}
+    th, td{padding:0px 1px 0px 1px; font-size:30px; line-height: 100% !important;}
     .pagebreak{page-break-after: always;}
 } 
 .border{border:black solid 1px;}
@@ -69,10 +69,12 @@ if($builder->countAll()>0){
                 <table id="" class="display nowrap table table-hover table-striped table-bordered" cellspacing="0" width="100%">
                     <!-- <table id="dataTable" class="table table-condensed table-hover w-auto dtable"> -->
                     <thead class="">
-                        <tr>
+                        <tr>                   
                             <th>Produk</th>
                             <th>Qty</th>
-                            <th>Harga</th>
+                            <th>Harga</th>         
+                            <th>Discount</th>
+                            <th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -91,37 +93,45 @@ if($builder->countAll()>0){
                         $no = 1;
                         $tprice=0;
                         foreach ($usr->getResult() as $usr) { 
+                            if($usr->transactiond_foc>0){$diskon=$usr->transactiond_price;$kdis="FOC";}else 
+                            if($usr->transactiond_nominal>0){$diskon=$usr->transactiond_nominal;$kdis="Nominal";}else 
+                            if($usr->transactiond_percent>0){$diskon=$usr->transactiond_percent/100*$usr->transactiond_price;$kdis=$usr->transactiond_percent."%";}else 
+                            {$diskon=0;$kdis="";}
+                            $qty=$usr->qty; 
+                            $price=$usr->price; 
+                            $stprice=$price-$diskon;
+                            $tprice+=$stprice;
+
+                            if($usr->product_start==null){$product_start="0000-00-00 00:00:00";}
+                            if($usr->user_id==null){$user_id=0;}
                             ?>
                             <tr>            
                                 <td class="text-left">
-                                    <?= $no++; ?>. <?= $usr->product_name; ?><br/>
+                                    <?= $usr->product_name; ?><br/>
                                     <?= $usr->product_batch; ?>
                                 </td>
-                                <?php 
-                                $qty=$usr->qty; 
-                                $price=$usr->price; 
-                                $tprice+=$price; 
-                                ?>
                                 <td>
-                                    <?= number_format($qty,0,".",",") ?> <?= $usr->unit_name; ?> 
+                                    <?= number_format($qty,0,",",".") ?> <?= $usr->unit_name; ?> 
                                 </td>
-                                <td><?= number_format($price,0,".",",") ?></td>
+                                <td><?= number_format($price,0,",",".") ?></td>
+                                <td class="text-small0"><?=number_format($diskon,0,",",".");?></td>
+                                <td class="text-small0"><?= number_format($stprice,0,",",".") ?></td>
                             </tr>
                         <?php } ?>
                         <tr>
-                            <th colspan="2" class="text-right">Total</th>
+                            <th colspan="4" class="text-right">Total</th>
                             <th>
-                                <?= number_format($tprice,0,".",","); ?>
+                                <?= number_format($tprice,0,",","."); ?>
                                 <input type="hidden" id="tagihan" value="<?=$tprice;?>"/>
                             </th>
                         </tr>
                         <tr>
-                            <th colspan="2" class="text-right">Bayar</th>
-                            <th class="dibayar"><?=number_format($transaction->transaction_pay,0,".",",");?></th>
+                            <th colspan="4" class="text-right">Bayar</th>
+                            <th class="dibayar"><?=number_format($transaction->transaction_pay,0,",",".");?></th>
                         </tr>
                         <tr>
-                            <th colspan="2" class="text-right">Kembalian</th>
-                            <th class="kembalian"><?=number_format($transaction->transaction_change,0,".",",");?></th>
+                            <th colspan="4" class="text-right">Kembalian</th>
+                            <th class="kembalian"><?=number_format($transaction->transaction_change,0,",",".");?></th>
                         </tr>
                     </tbody>
                 </table>                        
