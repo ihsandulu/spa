@@ -25,7 +25,7 @@ class display extends baseController
         ->join("(SELECT product_lanjutan AS pid, product_name AS pname FROM product)productlanjutan", "productlanjutan.pid=product.product_id", "left")
         ->where("product.category_id","100")
         ->where("product_lanjutan","0")
-        ->orderBy("product_name", "ASC")
+        ->orderBy("product_urutan", "ASC")
         ->get();
         $status="secondary";
         $category_id=0;
