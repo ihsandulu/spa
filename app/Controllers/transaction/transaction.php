@@ -1008,21 +1008,29 @@ class transaction extends baseController
                             <?php } ?>
                             <td class="text-small0"><?= $no++; ?></td>
                             <td class="text-small0">
-                                <?php if($usr->product_durasi>0&&$usr->product_lanjutan==0){
-                                    $statusroom="secondary";
+                                <?php 
+                                $statusroom="secondary";
+                                if($usr->product_durasi>0&&$usr->product_lanjutan==0){
                                     if(date("Y-m-d H:i:s")>$usr->product_start&&date("Y-m-d H:i:s")<$usr->product_bend){$statusroom="success";}
                                     elseif(date("Y-m-d H:i:s")>=$usr->product_bend&&date("Y-m-d H:i:s")<=$usr->product_end){$statusroom="warning";}
                                     else{
                                         $statusroom="danger";
                                     }
-                                    ?>
-                                    <div class="mb-10"><span class="bg-<?=$statusroom;?> dot spinner-grow" >&nbsp;</span> <?= $usr->product_name; ?></div>
+                                }
+                                ?>
+                                <div class="mb-10">
+                                    <?php if($usr->product_durasi>0&&$usr->product_lanjutan==0){?>
+                                        <span class="bg-<?=$statusroom;?> dot spinner-grow" >&nbsp;</span> 
+                                    <?php }?>
+                                    <?= $usr->product_name; ?>
+                                </div>
+                                <?php if($usr->user_id>0){?>
                                     <div class="mb-10 text-primary">Therapist:<?= $usr->user_name; ?></div>
+                                <?php }?>  
+                                <?php if($usr->product_durasi>0&&$usr->product_lanjutan==0){?>
                                     <div class="text-secondary mb-10">(<b class="text-success">Start:</b> <?= $usr->product_start; ?>)</div>
                                     <div class="text-secondary mb-10">(<b class="text-warning">Bend:</b> <?= $usr->product_bend; ?>)</div>
                                     <div class="text-secondary m-0">(<b class="text-danger">End:</b> <?= $usr->product_end; ?>)</div>
-                                <?php }else{?>
-                                     <div class="mb-10"><?= $usr->product_name; ?></div>
                                 <?php }?>
                             </td>                            
                             <td class="text-small0">

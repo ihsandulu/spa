@@ -496,4 +496,21 @@ class api extends baseController
         /* echo $this->db->getLastQuery();
         die; */
     }
+
+    public function urutan(){
+        $builder = $this->db->table('product');
+        if(isset($_GET["category_id"])){
+            $builder->where("category_id",$_GET["category_id"]);
+        }
+        $builder->orderBy("product_urutan","DESC");
+        $builder->limit("1");
+        $urutan=$builder->get();
+        $urutanterakhir=1;
+        foreach($urutan->getResult() as $urutan){
+            $urutanterakhir=$urutan->product_urutan+1;
+        }
+        echo $urutanterakhir;
+        /* echo $this->db->getLastQuery();
+        die; */
+    }
 }

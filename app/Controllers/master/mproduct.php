@@ -20,6 +20,25 @@ class mproduct extends baseController
     {
         $data = new \App\Models\master\mproduct_m();
         $data = $data->data();
+        $data["page"]="produk";
+        return view('master/mproduct_v', $data);
+    }
+
+
+    public function room()
+    {
+        $data = new \App\Models\master\mproduct_m();
+        $data = $data->data();
+        $data["page"]="room";
+        return view('master/mproduct_v', $data);
+    }
+
+
+    public function loker()
+    {
+        $data = new \App\Models\master\mproduct_m();
+        $data = $data->data();
+        $data["page"]="loker";
         return view('master/mproduct_v', $data);
     }
 

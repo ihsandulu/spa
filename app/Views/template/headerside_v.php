@@ -300,6 +300,44 @@
                             )
                         ) ||
                         (
+                            isset(session()->get("halaman")['8']['act_read']) 
+                            && session()->get("halaman")['8']['act_read'] == "1"
+                        )
+                    ) { ?>
+                    <li> 
+                        <a class="  " href="<?= base_url("mroom"); ?>" aria-expanded="false"><i class="fa fa-cube"></i><span class="hide-menu">Room</span></a>
+                    </li>
+                    <?php }?>
+
+                    <?php 
+                    if (
+                        (
+                            isset(session()->get("position_administrator")[0][0]) 
+                            && (
+                                session()->get("position_administrator") == "1" 
+                                || session()->get("position_administrator") == "2"
+                            )
+                        ) ||
+                        (
+                            isset(session()->get("halaman")['8']['act_read']) 
+                            && session()->get("halaman")['8']['act_read'] == "1"
+                        )
+                    ) { ?>
+                    <li> 
+                        <a class="  " href="<?= base_url("mloker"); ?>" aria-expanded="false"><i class="fa fa-cube"></i><span class="hide-menu">Loker</span></a>
+                    </li>
+                    <?php }?>
+
+                    <?php 
+                    if (
+                        (
+                            isset(session()->get("position_administrator")[0][0]) 
+                            && (
+                                session()->get("position_administrator") == "1" 
+                                || session()->get("position_administrator") == "2"
+                            )
+                        ) ||
+                        (
                             isset(session()->get("halaman")['22']['act_read']) 
                             && session()->get("halaman")['22']['act_read'] == "1"
                         )

@@ -187,7 +187,7 @@
 			
 			<style>
 			.room{
-				height:100px; 
+				height:200px; 
 				background:url("<?=base_url("images/room.jpg");?>");
 				background-repeat: no-repeat;
 				background-size: cover;

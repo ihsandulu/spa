@@ -13,7 +13,7 @@
                 padding: 100px 50px 30px 50px !important;
             }
 			.room{
-				height:100px; 
+				height:200px; 
 				background:url("<?=base_url("images/room.jpg");?>");
 				background-repeat: no-repeat;
 				background-size: cover;
@@ -22,7 +22,7 @@
 			.carddeck{position: absolute !important; top: 40%; left:50%; transform:translate(-50%,-50%);}
 			.carddeckbg{position: relative !important; top: 50%; left:50%; transform:translate(-50%,-50%);  opacity: 0.5;}
 			.text{ background:rgba(255,255,255,0.7);}
-			.judul{font-weight:bold; font-size:25px;}
+			.judul{font-weight:bold; font-size:18px; padding:0px;}
 			.subjudul1{font-weight:bold; font-size:12px; text-shadow:white 1px 1px 1px;}
 			.subjudul2{font-size:12px;}
 			.h25{height: 25px; }

@@ -110,6 +110,17 @@
 
                                     </div>
                                 </div> 
+                                                             
+                                <div class="form-group">
+                                    <label class="control-label col-sm-12" for="category_durasi">Memiliki Durasi (opsional):</label>
+                                    <div class="col-sm-10">
+                                        <select required class="form-control select" id="category_durasi" name="category_durasi">
+                                            <option value="0" <?= ($category_durasi == "0") ? "selected" : ""; ?>>Tidak</option>
+                                            <option value="1" <?= ($category_durasi == "1") ? "selected" : ""; ?>>Ya</option>
+                                        </select>
+
+                                    </div>
+                                </div> 
                                 
                                 <div class="form-group form-check">
                                     <label class="form-check-label pl-3">
@@ -147,6 +158,7 @@
                                         <th>Toko</th>
                                         <th>Unik</th>
                                         <th>Posisi</th>
+                                        <th>Durasi</th>
                                         <th>Kategori</th>
                                     </tr>
                                 </thead>
@@ -162,6 +174,7 @@
                                         ->get();
                                     //echo $this->db->getLastquery();
                                     $no = 1;
+                                    $durasi=array("Tidak","Ya");
                                     foreach ($usr->getResult() as $usr) { 
                                         $unik=array("Tidak","Ya");
                                             ?>
@@ -213,6 +226,7 @@
                                             <td><?= $usr->store_name; ?></td>
                                             <td><?= $unik[$usr->category_unique]; ?></td>
                                             <td><?= $usr->position_name; ?></td>
+                                            <td><?= $durasi[$usr->category_durasi]; ?></td>
                                             <td>
                                                 <?= $usr->category_name; ?>
                                                 <?php if($usr->category_lanjutan>0){?>

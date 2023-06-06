@@ -44,7 +44,12 @@ $routes->add('/mstore', 'master\mstore::index');
 $routes->add('/mppn', 'master\mppn::index');
 $routes->add('/mcategory', 'master\mcategory::index');
 $routes->add('/munit', 'master\munit::index');
+
 $routes->add('/mproduct', 'master\mproduct::index');
+$routes->add('/mroom', 'master\mproduct::room');
+$routes->add('/mloker', 'master\mproduct::loker');
+$routes->add('/urutan', 'api::urutan');
+
 $routes->add('/transaction', 'transaction\transaction::index');
 $routes->add('/listnota', 'transaction\transaction::listnota');
 $routes->add('/createnota', 'transaction\transaction::createnota');
@@ -91,9 +96,6 @@ $routes->add('/mbank', 'master\mbank::index');
 
 $routes->add('/rprodukkeluar', 'report\rprodukkeluar::index');
 $routes->add('/rprodukmasuk', 'report\rprodukmasuk::index');
-
-$routes->add('/mroom', 'master\mroom::index');
-$routes->add('/mloker', 'master\mloker::index');
 
 $routes->add('/cekproductlanjutan', 'transaction\transaction::cekproductlanjutan');
 
