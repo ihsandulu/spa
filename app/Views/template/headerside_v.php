@@ -111,8 +111,8 @@
                             )
                         ) ||
                         (
-                            isset(session()->get("halaman")['22']['act_read']) 
-                            && session()->get("halaman")['22']['act_read'] == "1"
+                            isset(session()->get("halaman")['34']['act_read']) 
+                            && session()->get("halaman")['34']['act_read'] == "1"
                         )
                     ) { ?>
                     <li> 
@@ -128,8 +128,8 @@
                                     )
                                 ) ||
                                 (
-                                    isset(session()->get("halaman")['23']['act_read']) 
-                                    && session()->get("halaman")['23']['act_read'] == "1"
+                                    isset(session()->get("halaman")['35']['act_read']) 
+                                    && session()->get("halaman")['35']['act_read'] == "1"
                                 )
                             ) { ?>
                             <li><a href="<?= base_url("mpositionm"); ?>"><i class="fa fa-caret-right"></i> &nbsp;Grade Member</a></li>
@@ -144,8 +144,8 @@
                                     )
                                 ) ||
                                 (
-                                    isset(session()->get("halaman")['21']['act_read']) 
-                                    && session()->get("halaman")['21']['act_read'] == "1"
+                                    isset(session()->get("halaman")['36']['act_read']) 
+                                    && session()->get("halaman")['36']['act_read'] == "1"
                                 )
                             ) { ?>
                             <li><a href="<?= base_url("mmember"); ?>"><i class="fa fa-caret-right"></i> &nbsp;Member</a></li>
