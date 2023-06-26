@@ -39,7 +39,7 @@
     .tebal12{font-size:52px; font-weight:bold;}	
     .tebal14{font-size:54px; font-weight:bold;}	
     .tebal16{font-size:56px; font-weight:bold;}		
-    th, td{padding:0px 1px 0px 1px; font-size:40px !important; line-height: 100% !important;}
+    th, td{padding:0px 1px 0px 1px; font-size:50px !important; line-height: 100% !important;}
     .pagebreak{page-break-after: always;}
 } 
 .border{border:black solid 1px;}
