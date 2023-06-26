@@ -31,12 +31,33 @@
                         $to=date("Y-m-d");
                     }
 
+                    if(isset($_GET["karyawan"])&&$_GET["karyawan"]>0){
+                        $karyawan=$_GET["karyawan"];
+                    }else{
+                        $karyawan=0;
+                    }
+
                     ?>
                     <form class="form-inline" >
                         <label for="from">Dari:</label>&nbsp;
                         <input type="date" id="from" name="from" class="form-control" value="<?=$from;?>">&nbsp;
                         <label for="to">Ke:</label>&nbsp;
                         <input type="date" id="to" name="to" class="form-control" value="<?=$to;?>">&nbsp;
+                        <label for="to">Karyawan:</label>&nbsp;
+                        <select id="karyawan" name="karyawan" class="form-control">
+                            <option value="0" <?=($karyawan=="0")?"selected":"";?>>Pilih Karyawan</option>
+                            <?php 
+                            $karyawa=$this->db->table("user")
+                            ->join("position", "position.position_id=user.position_id", "left")
+                            ->like("position.position_name","trainer","both")
+                            ->orlike("position.position_name","therapist","both")
+                            ->orlike("position.position_name","sales","both")
+                            ->orderby("user.user_name","ASC")
+                            ->get();
+                            foreach($karyawa->getResult() as $karyawa){?>
+                            <option value="<?=$karyawa->user_id;?>" <?=($karyawa->user_id==$karyawan)?"selected":"";?>><?=$karyawa->user_name;?></option>
+                            <?php }?>
+                        </select>&nbsp;
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
 
@@ -60,6 +81,7 @@
                                         <th>Invoice</th>
                                         <th>Product</th>
                                         <th>Komisi</th>
+                                        <th>For Excel</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -84,10 +106,17 @@
                                     }else{
                                         $builder->where("transaction.transaction_date",date("Y-m-d"));
                                     }
+                                    if(isset($_GET["karyawan"])&&$_GET["karyawan"]>0){
+                                        $builder->groupStart();
+                                        $builder->where("user.user_id",$this->request->getGet("karyawan"));
+                                        $builder->orWhere("trainer.trainer_id",$this->request->getGet("karyawan"));
+                                        $builder->orWhere("sales.sales_id",$this->request->getGet("karyawan"));
+                                        $builder->groupEnd();
+                                    }
                                     $usr= $builder
                                         ->orderBy("transaction.transaction_id", "DESC")
                                         ->get();
-                                    //echo $this->db->getLastquery();
+                                    // echo $this->db->getLastquery();
                                     $no = 1;
                                     $ttransactionnom=0;
                                     foreach ($usr->getResult() as $usr) { 
@@ -95,32 +124,45 @@
                                             switch($x){
                                                 case 100:
                                                     $jabatan = "Therapist";
+                                                    $id = $usr->user_id;
                                                     $nama = $usr->user_name;
                                                     $profit = $usr->product_profittherapist;
                                                 break;
                                                 case 101:
                                                     $jabatan = "Trainer";
+                                                    $id = $usr->trainer_id;
                                                     $nama = $usr->trainer_name;
                                                     $profit = $usr->product_profittrainer;
                                                 break;
                                                 case 102:
                                                     $jabatan = "Sales Product";
+                                                    $id = $usr->sales_id;
                                                     $nama = $usr->sales_name;
                                                     $profit = $usr->product_profitsales;
                                                 break;
                                             }
-                                        ?>
-                                        <tr>                                            
-                                            <td><?= $no++; ?></td>
-                                            <td><?= $usr->transaction_date; ?></td>
-                                            <td><?= $usr->store_name; ?></td>
-                                            <td><?= $jabatan; ?></td>
-                                            <td><?= $nama; ?></td>
-                                            <td><?= $usr->transaction_no; ?></td>
-                                            <td><?= $usr->product_name; ?></td>
-                                            <td><?= number_format($profit,0,".",","); $ttransactionnom+=$profit; ?></td>
-                                        </tr>
-                                    <?php }
+                                            $hide="";
+                                            if(isset($_GET["karyawan"])&&$_GET["karyawan"]>0){
+                                                if($id==$_GET["karyawan"]){
+                                                    $hide="";
+                                                }else{
+                                                    $hide="d-none";
+                                                }
+                                            }
+                                                ?>
+                                                <tr class="<?=$hide;?>">                                            
+                                                    <td><?= $no++; ?></td>
+                                                    <td><?= $usr->transaction_date; ?></td>
+                                                    <td><?= $usr->store_name; ?></td>
+                                                    <td><?= $jabatan; ?></td>
+                                                    <td><?= $nama; ?></td>
+                                                    <td><?= $usr->transaction_no; ?></td>
+                                                    <td><?= $usr->product_name; ?></td>
+                                                    <td><?= number_format($profit,0,",","."); $ttransactionnom+=$profit; ?></td>
+                                                    <td><?= $profit; ?></td>
+                                                </tr>
+                                    <?php 
+                                        }
                                     } ?>
                                     
                                         <tr>
@@ -131,7 +173,8 @@
                                             <td></td>
                                             <td></td>
                                             <td class="text-right">Total&nbsp;</td>
-                                            <td><?= number_format($ttransactionnom,0,".",","); ?></td>
+                                            <td><?= number_format($ttransactionnom,0,",","."); ?></td>
+                                            <td><?= $ttransactionnom; ?></td>
                                         </tr>
                                 </tbody>
                             </table>
