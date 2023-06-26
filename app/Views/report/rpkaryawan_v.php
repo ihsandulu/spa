@@ -158,7 +158,7 @@
                                                     <td><?= $nama; ?></td>
                                                     <td><?= $usr->transaction_no; ?></td>
                                                     <td><?= $usr->product_name; ?></td>
-                                                    <td><?= number_format($profit,0,",","."); $ttransactionnom+=$profit; ?></td>
+                                                    <td><?= number_format($profit,0,".",","); $ttransactionnom+=$profit; ?></td>
                                                     <td><?= $profit; ?></td>
                                                 </tr>
                                     <?php 
@@ -173,7 +173,7 @@
                                             <td></td>
                                             <td></td>
                                             <td class="text-right">Total&nbsp;</td>
-                                            <td><?= number_format($ttransactionnom,0,",","."); ?></td>
+                                            <td><?= number_format($ttransactionnom,0,".",","); ?></td>
                                             <td><?= $ttransactionnom; ?></td>
                                         </tr>
                                 </tbody>
