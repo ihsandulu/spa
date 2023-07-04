@@ -61,6 +61,11 @@ class rtransaction_m extends core_m
             $this->db->table('transaction')->update($input, array("transaction_id" => $this->request->getPost("transaction_id")));
             $data["message"] = "Update Success";
             //echo $this->db->last_query();die;
+
+            //update kas
+            $inputkas["kas_date"] = $this->request->getPost("transaction_date");
+            $this->db->table('kas')->update($inputkas, array("transaction_id" => $this->request->getPost("transaction_id")));
+            $data["message"] = "Update Success";
         }
 
         //update
