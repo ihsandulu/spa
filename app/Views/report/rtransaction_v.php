@@ -133,7 +133,17 @@
                                             </td>
                                             <?php }?>                                        
                                             <td><a href="<?=base_url("rtransactiond?transaction_id=".$usr->transaction_id);?>" class="btn btn-xs btn-info"><span class="fa fa-cubes"></span> <?= $no++; ?></a></td>
-                                            <td><?= $usr->transaction_date; ?></td>
+                                            <td>                                                
+                                                <form class="form-horizontal" method="post" enctype="multipart/form-data">  
+                                                    <?php 
+                                                    $namabutton = 'name="change"';
+                                                    $judul = "Update Pembayaran";
+                                                    ?>
+                                                    <input name="transaction_date" type="date" value="<?= $usr->transaction_date; ?>"/>                                                    
+                                                    <input type="hidden" name="transaction_id" value="<?= $usr->transaction_id; ?>" /><br/>
+                                                    <button type="submit" id="submit" class="btn btn-primary col-md-12" <?= $namabutton; ?> value="OK">Submit</button>
+                                                </form>
+                                            </td>
                                             <td><?= $usr->store_name; ?></td>
                                             <td><?= $usr->transaction_no; ?></td>
                                             <td><?= $usr->transaction_shift; ?></td>
