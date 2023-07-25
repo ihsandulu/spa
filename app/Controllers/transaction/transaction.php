@@ -783,7 +783,48 @@ class transaction extends baseController
         // echo 0;
         // echo $this->db->getLastQuery();
 
-        //kas
+        $cekkasdouble=$this->db->table("kas")
+        ->where("store_id",session()->get("store_id"))
+        ->where("kas_shift",$kas_shift)
+        ->where("transaction_id",$transaction_id)
+        ->where("kas_type",'masuk')
+        ->where("account_id",$account_id)
+        ->where("kas_date",date("Y-m-d"))
+        ->get();
+        $numRows = $cekkasdouble->getNumRows();
+        if($numRows>0){            
+            if ($cekkasdouble->getResult()) {
+                $kas_id = $cekkasdouble->getRow()->kas_id;
+                //update kas
+                $where1["kas_id"]=$kas_id;
+                $input1["store_id"]=session()->get("store_id");
+                $input1["kas_shift"]= $kas_shift;
+                $input1["transaction_id"]= $transaction_id;
+                $input1["kas_nominal"]= $transaction_bill;
+                $input1["kas_type"]= 'masuk';
+                $input1["account_id"]= $account_id;
+                $input1["kas_description"]= "Pembayaran ".$transaction_no;
+                $input1["kas_date"]= date("Y-m-d");
+                $builder=$this->db->table("kas")
+                ->update($input1,$where1);
+            } else {
+                echo "kas id tidak ditemukan";die;
+            }            
+        }else{
+            //insert kas
+            $input11["store_id"]=session()->get("store_id");
+            $input11["kas_shift"]= $kas_shift;
+            $input11["transaction_id"]= $transaction_id;
+            $input11["kas_nominal"]= $transaction_bill;
+            $input11["kas_type"]= 'masuk';
+            $input11["account_id"]= $account_id;
+            $input11["kas_description"]= "Pembayaran ".$transaction_no;
+            $input11["kas_date"]= date("Y-m-d");
+            $builder=$this->db->table("kas")
+            ->insert($input11);
+        }
+
+        /* //kas
         $kas=$this->db->table("kas")
         ->where("transaction_id",$transaction_id);
         // ->get();
@@ -808,7 +849,7 @@ class transaction extends baseController
             $builder=$this->db->table("kas")
             ->update($input1,$where1);
 
-        }
+        } */
         
 
         // echo $this->db->getLastQuery();
