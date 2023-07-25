@@ -149,6 +149,8 @@
                                                     $hide="d-none";
                                                 }
                                             }
+
+                                            if($hide==""){
                                                 ?>
                                                 <tr class="<?=$hide;?>">                                            
                                                     <td><?= $no++; ?></td>
@@ -162,6 +164,7 @@
                                                     <td><?= $profit; ?></td>
                                                 </tr>
                                     <?php 
+                                            }
                                         }
                                     } ?>
                                     
