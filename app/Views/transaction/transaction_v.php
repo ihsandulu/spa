@@ -205,7 +205,7 @@ function cekproductlanjutan(transaction_id){
                         
                     </div>                    
 
-                    <div  onclick="fokus('bayar')" onfocusout="fokus('barcode');" class="modal " id="bayar">                       
+                    <div  onclick="fokus('bayar')" onfocusout="" class="modal " id="bayar">                       
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -238,41 +238,29 @@ function cekproductlanjutan(transaction_id){
                                     </div>
                                     <div class="pt-3" id="bbill">
                                         <div class="form-group">
-                                            <label for="account_id">Tipe Pembayaran:</label>
-                                            <select onchange="cekpembayaran();" id="account_id" class="form-control" >
-                                                <?php $account=$this->db->table("account")
+                                            <label for="metodepembayaran_id">Tipe Pembayaran:</label>
+                                            <select onchange="cekpembayaran();" id="metodepembayaran_id" class="form-control" >
+                                                <?php $metodepembayaran=$this->db->table("metodepembayaran")
                                                 ->where("store_id",session()->get("store_id"))
-                                                ->where("account_ispembayaran","1")
-                                                ->orderBy("account_id")->get();
-                                                foreach ($account->getResult() as $account) {
-                                                    if($account->account_id==2){$selected="selected";}else{$selected="";}?>                                                    
-                                                <option value="<?=$account->account_id;?>" <?=$selected;?>><?=$account->account_name;?></option>
+                                                ->orderBy("metodepembayaran_id")->get();
+                                                
+                                                foreach ($metodepembayaran->getResult() as $metodepembayaran) {
+                                                    $metodepembayarand=$this->db->table("metodepembayarand")
+                                                    ->where("metodepembayaran_id",$metodepembayaran->metodepembayaran_id)
+                                                    ->orderBy("metodepembayarand_id","ASC")->get();             
+                                                    $urutan=array();   
+                                                    $no=0;                                
+                                                    foreach ($metodepembayarand->getResult() as $metodepembayarand) {
+                                                        $urutan[]=$metodepembayarand->metodepembayarand_id."-".$no;
+                                                        $no++;
+                                                    }
+                                                    $urut = json_encode($urutan);
+                                                    ?>                                                    
+                                                        <option urutan="<?=$urut;?>" value="<?=$metodepembayaran->metodepembayaran_id;?>"><?=$metodepembayaran->metodepembayaran_name;?></option>
                                                 <?php }?>
                                             </select>
                                         </div>
-                                        <div class="form-group cash">
-                                            <label for="uang" class="bg-warning p-2">Cash:</label> &nbsp
-                                            <input onkeyup="rupiahnumerik(this);" change="kembalian('cash');" onclick="fokus('bayar')" type="number" class="form-control" ids="uang" id="cash" name="cash">
-                                            <script>rupiahnumerik($("#cash"))</script>
-                                        </div>
-                                        <div class="form-group nucard1">
-                                            <label for="nucard1" class="bg-success p-2">Card Number (1):</label> &nbsp
-                                            <input type="text" class="form-control" id="nucard1">
-                                        </div>
-                                        <div class="form-group nocard1">
-                                            <label for="nocard1">Nominal Card (1):</label> &nbsp
-                                            <input onkeyup="rupiahnumerik(this);" change="kembalian('nocard1');" onclick="fokus('bayar')" type="number" class="form-control" id="nocard1" name="nocard1">
-                                            <script>rupiahnumerik($("#nocard1"))</script>
-                                        </div>
-                                        <div class="form-group nucard2">
-                                            <label for="nucard2" class="bg-info p-2">Card Number (2):</label> &nbsp
-                                            <input type="text" class="form-control" id="nucard2">
-                                        </div>
-                                        <div class="form-group nocard2">
-                                            <label for="nocard2">Nominal Card (2):</label> &nbsp
-                                            <input onkeyup="rupiahnumerik(this);" change="kembalian('nocard2');" onclick="fokus('bayar')" type="number" class="form-control" id="nocard2" name="nocard2">
-                                            <script>rupiahnumerik($("#nocard2"))</script>
-                                        </div>
+                                        <div class="p-0" id="arraykode"></div>  
                                     </div>
                                     <div class="pt-3">
                                         <input onchange="kembalian1('uang');" type="hidden" class="form-control" id="uang">
@@ -287,79 +275,31 @@ function cekproductlanjutan(transaction_id){
                             </div>
                         </div>
                     </div>
+                    
                     <script>
                         function cekpembayaran(){
-                            let pembayaran=$("#account_id").val();
-                            $("#uang").val(0);
-                            $("#cash").val("0");
-                            $("#nocard1").val("0");
-                            $("#nocard2").val("0");
-                            $("#cash1").val("0");
-                            $("#nocard11").val("0");
-                            $("#nocard21").val("0");
-                            $(".nucard1").hide().val("");
-                            $(".nucard2").hide().val("");
-
-                            //cash
-                            if(pembayaran==101){
-                                $(".cash").show();
-                                $(".nucard1").hide().val("");
-                                $(".nocard1").hide().val("0");
-                                $(".nucard2").hide().val("");
-                                $(".nocard2").hide().val("0");
-                            }
-                            //card
-                            if(pembayaran==102){
-                                $(".cash").hide().val("0");
-                                $(".nucard1").show();
-                                $(".nocard1").show();
-                                $(".nucard2").hide().val("");
-                                $(".nocard2").hide().val("0");
-                            }
-                            //cash&card
-                            if(pembayaran==103){
-                                $(".cash").show();
-                                $(".nucard1").show();
-                                $(".nocard1").show();
-                                $(".nucard2").hide().val("");
-                                $(".nocard2").hide().val("0");
-                            }
-                            //card&card
-                            if(pembayaran==104){
-                                $(".cash").hide().val("0");
-                                $(".nucard1").show();
-                                $(".nocard1").show();
-                                $(".nucard2").show();
-                                $(".nocard2").show();
-                            }
+                            let pembayaran=$("#metodepembayaran_id").val();
+                            $.get("<?=base_url("arraymetodepembayaran");?>",{metodepembayaran_id:pembayaran})
+                            .done(function(data){
+                                $("#arraykode").html(data);
+                            });                            
                         }
                         cekpembayaran();                        
                         
-                        function kembalian(bayar1){
+                        function kembalian(){
                             let pembayaran=$("#account_id").val();
                             let uang = 0 ;
-                            let cash1 = parseInt($("#cash1").val());
-                            let nocard11 = parseInt($("#nocard11").val());
-                            let nocard21 = parseInt($("#nocard21").val());
-                            //cash
-                            if(pembayaran==101){
-                               uang = cash1;
-                            }
-                            //card
-                            if(pembayaran==102){
-                               uang = nocard11;                                
-                            }
-                            //cash&card
-                            if(pembayaran==103){
-                               uang = cash1+nocard11;                                 
-                            }
-                            //card&card
-                            if(pembayaran==104){
-                               uang = nocard11+nocard21;   
-                            }
+                           
+                            const inputNumbers = document.querySelectorAll('.inputnyanom1');
+
+                            inputNumbers.forEach(input => {
+                                uang += parseFloat(input.value || 0);
+                            });
+
                             $("#uang").val(uang);
                             setTimeout(() => {
                                 kembalian1('uang');
+                                // $(".inputbayar:first").focus();
                             }, 200);
 
                         }
@@ -707,7 +647,7 @@ function cekproductlanjutan(transaction_id){
                                     $("#fokus").val("cari"); 
                                 break;         
                                 case 'bayar':
-                                    // $("#uang").focus();
+                                    // $(".inputbayar:first").focus();
                                     $("#fokus").val("bayar"); 
                                 break;          
                                 case 'modalawal':
@@ -753,8 +693,10 @@ function cekproductlanjutan(transaction_id){
                                 }
                             });
                         }
+
+                        
                         function pelunasan(){                           
-                            let account_id = $("#account_id").val();
+                            // let account_id = $("#account_id").val();
                             let transaction_id = $("#transaction_id").val();
                             let transaction_no = $("#transaction_no").val();
                             let transaction_bill = $("#tagihan").val();
@@ -769,6 +711,52 @@ function cekproductlanjutan(transaction_id){
                             let transaction_nominalcard2=$("#nocard21").val();
 
                             let transaction_pending=$("#transaction_pending").val();
+
+                            let metodepembayaran_id=$("#metodepembayaran_id").val();
+
+                            let pbyr = "";
+                            let pbyrn = {};
+                                // alert("<?=base_url("isipbyr");?>?metodepembayaran_id="+metodepembayaran_id);
+                            $.get("<?=base_url("isipbyr");?>",{metodepembayaran_id:metodepembayaran_id})
+                            .done(function(data){
+                                let pecah = data.split(","); 
+                                let dud=0;    
+                                let length = pecah.length-1;    
+                                for(var i = 0; i < length; i++){
+                                    let idpecah= pecah[i];
+                                    let isipecah = $("#"+pecah[i]).val(); 
+                                    pbyrn[idpecah]=isipecah; 
+                                    dud++; 
+                                    // alert(dud+"=="+length);
+                                    if(dud==length){
+                                        /* $("#test").html("<?=base_url("pelunasan");?>?"+"transaction_id="+transaction_id+"&transaction_bill="+transaction_bill+"&transaction_pay="+transaction_pay+"&transaction_change="+transaction_change+"&shift="+shift+"&transaction_no="+transaction_no+"&transaction_pending="+transaction_pending+"&metodepembayaran_id="+metodepembayaran_id+"&pbyrn="+pbyrn+"&a="+1); */
+
+                                        pbyrn["transaction_id"]=transaction_id;
+                                        pbyrn["transaction_bill"]=transaction_bill;
+                                        pbyrn["transaction_pay"]=transaction_pay;
+                                        pbyrn["transaction_change"]=transaction_change;
+                                        pbyrn["shift"]=shift;
+                                        pbyrn["transaction_no"]=transaction_no;
+                                        pbyrn["transaction_pending"]=transaction_pending;
+                                        pbyrn["metodepembayaran_id"]=metodepembayaran_id; 
+                                        $.get("<?=base_url("pelunasan");?>",pbyrn)
+                                        .done(function(data){       
+                                            // alert(data); 
+                                            // $("#test").html(data);
+                                            setTimeout(() => {
+                                                updatestatus(transaction_id, data);
+                                                print(transaction_id);                                
+                                                $("#bayar").modal('hide');
+                                                cekstatus(transaction_id);
+                                                fokus('barcode');
+                                                bayarbill();
+                                            }, 200);                         
+                                            
+                                        });
+                                    }
+                                }
+                                
+                            });
                             
 
                             /* $("#test").html("<?=base_url("pelunasan");?>?account_id="+account_id
@@ -786,33 +774,7 @@ function cekproductlanjutan(transaction_id){
                             +"&transaction_pending="+transaction_pending); */
                             // alert();
                             
-                            $.get("<?=base_url("pelunasan");?>",{
-                                account_id:account_id,
-                                transaction_id:transaction_id,
-                                transaction_bill:transaction_bill,
-                                transaction_pay:transaction_pay,
-                                transaction_change:transaction_change,
-                                shift:shift,
-                                transaction_no:transaction_no,
-                                transaction_nominalcash:transaction_nominalcash,
-                                transaction_numbercard1:transaction_numbercard1,
-                                transaction_nominalcard1:transaction_nominalcard1,
-                                transaction_numbercard2:transaction_numbercard2,
-                                transaction_nominalcard2:transaction_nominalcard2,
-                                transaction_pending:transaction_pending
-                            })
-                            .done(function(data){       
-                                // alert(data); 
-                                setTimeout(() => {
-                                    updatestatus(transaction_id, data);
-                                    print(transaction_id);                                
-                                    $("#bayar").modal('hide');
-                                    cekstatus(transaction_id);
-                                    fokus('barcode');
-                                    bayarbill();
-                                }, 200);                         
-                                
-                            });
+                            
                         }
                         function formatRupiah(num){
                             var str = num.toString().replace("", ""), parts = false, output = [], i = 1, formatted = null;
@@ -1142,7 +1104,7 @@ function cekproductlanjutan(transaction_id){
                         $(document).on("keyup", function(e){ 
                             let ifokus = $("#fokus").val();   
                             let transaction_id =   $("#transaction_id").val();  
-                            
+                            // alert(e.which);
                             if (e.which==9) {
                                 // alert(ifokus);
                                 if(ifokus=="" || ifokus=="barcode"){
@@ -1153,6 +1115,23 @@ function cekproductlanjutan(transaction_id){
                                     fokus('membername');
                                 }else if(ifokus=="membername"){
                                     fokus('memberno');
+                                } if(ifokus=="bayar"){
+                                    /* let currentElement = $(".inputbayar:focus");
+                                    if (currentElement.length === 0) {
+                                        $(".inputbayar:first").focus();
+                                    }else{
+                                        $(".inputbayar").on("focus", function() {
+                                            let currentElement = $(this);
+                                            // alert("Elemen yang sedang fokus:", currentElement);
+                                        });
+                                    }
+                                    let nextElement = currentElement.nextAll(".inputbayar");
+                                    if (nextElement.length > 0) {
+                                        nextElement.focus();
+                                    } else {
+                                        // $(".inputbayar:first").focus();
+                                    } */
+
                                 }
                             }else if(e.which=="13"){
                                 <?php 
@@ -1185,7 +1164,7 @@ function cekproductlanjutan(transaction_id){
                                 }   
                                 <?php }?>  
                                 
-                            }else if(e.which==17){
+                            }else if(e.which==192){
                                 <?php 
                                 if (
                                     (

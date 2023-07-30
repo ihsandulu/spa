@@ -736,92 +736,103 @@ class transaction extends baseController
         echo $data["message"];
     }
 
-    public function pelunasan(){
-        $account_id = $this->request->getGet("account_id");
+    
+
+    public function pelunasan(){     
+        // echo print_r($this->request->getGet());die;
+        $metodepembayaran_id = $this->request->getGet("metodepembayaran_id");
         $transaction_id = $this->request->getGet("transaction_id");
         $transaction_no = $this->request->getGet("transaction_no");
         $transaction_bill = $this->request->getGet("transaction_bill");
         $transaction_pay = $this->request->getGet("transaction_pay");
         $transaction_change = $this->request->getGet("transaction_change");
-        $kas_shift = $this->request->getGet("shift");
-        
-        //metodepembayaran   
-        $transaction_nominalcash = $this->request->getGet("transaction_nominalcash");
-        $transaction_numbercard1 = $this->request->getGet("transaction_numbercard1");
-        $transaction_nominalcard1 = $this->request->getGet("transaction_nominalcard1");
-        $transaction_numbercard2 = $this->request->getGet("transaction_numbercard2");
-        $transaction_nominalcard2 = $this->request->getGet("transaction_nominalcard2");
-
+        $kas_shift = $this->request->getGet("shift"); 
         $transaction_pending = $this->request->getGet("transaction_pending");
         if($transaction_pending>0){
             $transaction_status=2;
         }else{
             $transaction_status=0;
         }
-        echo $transaction_status;
-
-
-        
+        // echo $transaction_status;        
 
         $input["transaction_bill"]=$transaction_bill;
         $input["transaction_pay"]=$transaction_pay;
         $input["transaction_change"]=$transaction_change;
         $input["transaction_status"]=$transaction_status;
-        $input["account_id"]=$account_id;
-        //metodepembayaran        
-        $input["transaction_nominalcash"]=$transaction_nominalcash;
-        $input["transaction_numbercard1"]=$transaction_numbercard1;
-        $input["transaction_nominalcard1"]=$transaction_nominalcard1;
-        $input["transaction_numbercard2"]=$transaction_numbercard2;
-        $input["transaction_nominalcard2"]=$transaction_nominalcard2;
-
+        $input["metodepembayaran_id"]=$metodepembayaran_id;
         $input["transaction_pending"]=$transaction_pending;
+        // print_r($input);die;
 
         $this->db->table("transaction")
         ->where("transaction_id",$transaction_id)
         ->update($input);
-        // echo 0;
-        // echo $this->db->getLastQuery();
+        // echo $this->db->getLastQuery();        
 
-        $cekkasdouble=$this->db->table("kas")
-        ->where("store_id",session()->get("store_id"))
-        ->where("kas_shift",$kas_shift)
-        ->where("transaction_id",$transaction_id)
-        ->where("kas_type",'masuk')
-        ->where("account_id",$account_id)
-        ->where("kas_date",date("Y-m-d"))
+        //masuk kas
+        $metodepembayarand=$this->db->table("metodepembayarand")
+        ->join("account","account.account_id=metodepembayarand.account_id","left")
+        ->join("mastermetodepembayaran","mastermetodepembayaran.mastermetodepembayaran_id=account.mastermetodepembayaran_id","left")
+        ->where("metodepembayaran_id",$metodepembayaran_id)
+        ->orderBy("metodepembayarand_id","ASC")
         ->get();
-        $numRows = $cekkasdouble->getNumRows();
-        if($numRows>0){            
-            if ($cekkasdouble->getResult()) {
-                $kas_id = $cekkasdouble->getRow()->kas_id;
-                //update kas
-                $where1["kas_id"]=$kas_id;
-                $input1["store_id"]=session()->get("store_id");
-                $input1["kas_shift"]= $kas_shift;
-                $input1["transaction_id"]= $transaction_id;
-                $input1["kas_nominal"]= $transaction_bill;
-                $input1["kas_type"]= 'masuk';
-                $input1["account_id"]= $account_id;
-                $input1["kas_description"]= "Pembayaran ".$transaction_no;
-                $input1["kas_date"]= date("Y-m-d");
+        $no=0;
+        $kode=array(2,3,4,6,7,8,9,10); 
+        // echo $this->db->getLastQuery();die;
+        foreach($metodepembayarand->getResult() as $metodepembayarand){  
+            if(in_array($metodepembayarand->mastermetodepembayaran_id,$kode)){ 
+                $nomor=$this->request->getGet("nomor-".$metodepembayarand->metodepembayarand_id."-".$no);
+                $input1["kas_".$metodepembayarand->mastermetodepembayaran_name]=$nomor;
+                $input11["kas_".$metodepembayarand->mastermetodepembayaran_name]=$nomor;
+            }
+            $nominal=$this->request->getGet("nominal-".$metodepembayarand->metodepembayarand_id."-".$no."1");
+            // echo $nominal;die;
+            $account_id=$metodepembayarand->account_id;
+            
+            
+            $wherer["store_id"]=session()->get("store_id");
+            $wherer["kas_shift"]=$kas_shift;
+            $wherer["transaction_id"]=$transaction_id;
+            $wherer["kas_type"]='masuk';
+            $wherer["account_id"]=$account_id;
+            $wherer["kas_date"]=date("Y-m-d");
+            // print_r($wherer);die;
+            $builder = $this->db->table("kas");
+            $cekkasdouble = $builder->getWhere($wherer);
+            // echo $this->db->getLastQuery();die;
+            $numRows = $cekkasdouble->getNumRows();
+            if($numRows>0){            
+                if ($cekkasdouble->getResult()) {
+                    $kas_id = $cekkasdouble->getRow()->kas_id;
+                    //update kas
+                    $where1["kas_id"]=$kas_id;
+                    $input1["store_id"]=session()->get("store_id");
+                    $input1["kas_shift"]= $kas_shift;
+                    $input1["transaction_id"]= $transaction_id;
+                    $input1["kas_nominal"]= $nominal;
+                    $input1["kas_type"]= 'masuk';
+                    $input1["account_id"]= $account_id;
+                    $input1["kas_description"]= "Pembayaran ".$transaction_no;
+                    $input1["kas_date"]= date("Y-m-d");
+                    $builder=$this->db->table("kas")
+                    ->update($input1,$where1);
+                    // echo $this->db->getLastQuery();die;
+                } else {
+                    echo "kas id tidak ditemukan";die;
+                }            
+            }else{
+                //insert kas
+                $input11["store_id"]=session()->get("store_id");
+                $input11["kas_shift"]= $kas_shift;
+                $input11["transaction_id"]= $transaction_id;
+                $input11["kas_nominal"]= $nominal;
+                $input11["kas_type"]= 'masuk';
+                $input11["account_id"]= $account_id;
+                $input11["kas_description"]= "Pembayaran ".$transaction_no;
+                $input11["kas_date"]= date("Y-m-d");
                 $builder=$this->db->table("kas")
-                ->update($input1,$where1);
-            } else {
-                echo "kas id tidak ditemukan";die;
-            }            
-        }else{
-            //insert kas
-            $input11["store_id"]=session()->get("store_id");
-            $input11["kas_shift"]= $kas_shift;
-            $input11["transaction_id"]= $transaction_id;
-            $input11["kas_nominal"]= $transaction_bill;
-            $input11["kas_type"]= 'masuk';
-            $input11["account_id"]= $account_id;
-            $input11["kas_description"]= "Pembayaran ".$transaction_no;
-            $input11["kas_date"]= date("Y-m-d");
-            $builder=$this->db->table("kas")
-            ->insert($input11);
+                ->insert($input11);
+            }
+            $no++;
         }
 
         /* //kas
@@ -1523,6 +1534,50 @@ class transaction extends baseController
             $this->db->table("transactiond")
             ->update($input1,$where1); */
         }
+    }
+
+    public function arraymetodepembayaran(){
+        $metodepembayarand=$this->db->table("metodepembayarand")
+        ->join("account","account.account_id=metodepembayarand.account_id","left")
+        ->join("mastermetodepembayaran","mastermetodepembayaran.mastermetodepembayaran_id=account.mastermetodepembayaran_id","left")
+        ->where("metodepembayaran_id",$_GET["metodepembayaran_id"])
+        ->get();
+        $no=0;
+        $kode=array(2,3,4,6,7,8,9,10);
+        foreach($metodepembayarand->getResult() as $metodepembayarand){?>
+            <div class="form-group">
+                <label class="bg-success p-2"><?=$metodepembayarand->account_name;?></label> 
+            </div>
+            <?php if(in_array($metodepembayarand->mastermetodepembayaran_id,$kode)){?>                
+            <div class="form-group nucard">
+                <label for="nomor-<?=$metodepembayarand->metodepembayarand_id;?>-<?=$no;?>" class="p-2">Nomor :</label> &nbsp
+                <input type="text" class="form-control inputbayar inputnyanum" id="nomor-<?=$metodepembayarand->metodepembayarand_id;?>-<?=$no;?>">
+            </div>
+            <?php }?>
+            <div class="form-group nocard">
+                <label for="nominal-<?=$metodepembayarand->metodepembayarand_id;?>-<?=$no;?>">Nominal :</label> &nbsp
+                <input onkeyup="rupiahnumerik(this);" change="kembalian();" onclick="fokus('bayar')" type="number" class="form-control inputbayar inputnyanom" id="nominal-<?=$metodepembayarand->metodepembayarand_id;?>-<?=$no;?>" name="nominal-<?=$metodepembayarand->metodepembayarand_id;?>-<?=$no;?>">
+                <script>rupiahnumerik($("#nominal-<?=$metodepembayarand->metodepembayarand_id;?>-<?=$no;?>"))</script>
+            </div>
+        <?php $no++;}
+    }
+
+    public function isipbyr(){
+        $metodepembayarand=$this->db->table("metodepembayarand")
+        ->join("account","account.account_id=metodepembayarand.account_id","left")
+        ->join("mastermetodepembayaran","mastermetodepembayaran.mastermetodepembayaran_id=account.mastermetodepembayaran_id","left")
+        ->where("metodepembayaran_id",$_GET["metodepembayaran_id"])
+        ->get();
+        $no=0;
+        $kode=array(2,3,4,6,7,8,9,10);
+        $lempar="";
+        foreach($metodepembayarand->getResult() as $metodepembayarand){
+            if(in_array($metodepembayarand->mastermetodepembayaran_id,$kode)){               
+                $lempar.="nomor-".$metodepembayarand->metodepembayarand_id."-".$no.",";
+            }
+            $lempar.="nominal-".$metodepembayarand->metodepembayarand_id."-".$no."1,";
+        $no++;}
+        return $lempar;
     }
 
     

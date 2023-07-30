@@ -357,6 +357,44 @@
                             )
                         ) ||
                         (
+                            isset(session()->get("halaman")['38']['act_read']) 
+                            && session()->get("halaman")['38']['act_read'] == "1"
+                        )
+                    ) { ?>
+                    <li> 
+                        <a class="  " href="<?= base_url("mmastermetodepembayaran"); ?>" aria-expanded="false"><i class="fa fa-bookmark-o"></i><span class="hide-menu">Master Metode Pembayaran</span></a>
+                    </li>
+                    <?php }?>
+
+                    <?php 
+                    if (
+                        (
+                            isset(session()->get("position_administrator")[0][0]) 
+                            && (
+                                session()->get("position_administrator") == "1" 
+                                || session()->get("position_administrator") == "2"
+                            )
+                        ) ||
+                        (
+                            isset(session()->get("halaman")['37']['act_read']) 
+                            && session()->get("halaman")['37']['act_read'] == "1"
+                        )
+                    ) { ?>
+                    <li> 
+                        <a class="  " href="<?= base_url("mmetodepembayaran"); ?>" aria-expanded="false"><i class="fa fa-bookmark-o"></i><span class="hide-menu">Metode Pembayaran</span></a>
+                    </li>
+                    <?php }?>
+
+                    <?php 
+                    if (
+                        (
+                            isset(session()->get("position_administrator")[0][0]) 
+                            && (
+                                session()->get("position_administrator") == "1" 
+                                || session()->get("position_administrator") == "2"
+                            )
+                        ) ||
+                        (
                             isset(session()->get("halaman")['23']['act_read']) 
                             && session()->get("halaman")['23']['act_read'] == "1"
                         )

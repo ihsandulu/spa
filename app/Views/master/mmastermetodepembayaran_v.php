@@ -36,14 +36,14 @@
                                     )
                                 ) ||
                                 (
-                                    isset(session()->get("halaman")['22']['act_create']) 
-                                    && session()->get("halaman")['22']['act_create'] == "1"
+                                    isset(session()->get("halaman")['38']['act_create']) 
+                                    && session()->get("halaman")['38']['act_create'] == "1"
                                 )
                             ) { ?>
                             <form method="post" class="col-md-2">
                                 <h1 class="page-header col-md-12">
                                     <button name="new" class="btn btn-info btn-block btn-lg" value="OK" style="">New</button>
-                                    <input type="hidden" name="account_id" />
+                                    <input type="hidden" name="mastermetodepembayaran_id" />
                                 </h1>
                             </form>
                             <?php } ?>
@@ -54,81 +54,29 @@
                         <div class="">
                             <?php if (isset($_POST['edit'])) {
                                 $namabutton = 'name="change"';
-                                $judul = "Update Akun";
+                                $judul = "Update Nama Metode Pembayaran";
                             } else {
                                 $namabutton = 'name="create"';
-                                $judul = "Tambah Akun";
+                                $judul = "Tambah Nama Metode Pembayaran";
                             } ?>
                             <div class="lead">
                                 <h3><?= $judul; ?></h3>
                             </div>
                             <form class="form-horizontal" method="post" enctype="multipart/form-data">                                                     
+                                                                                 
                                 <div class="form-group">
-                                    <label class="control-label col-sm-2" for="account_type">Tipe:</label>
+                                    <label class="control-label col-sm-2" for="mastermetodepembayaran_name">Nama Metode Pembayaran:</label>
                                     <div class="col-sm-10">
-                                        <select autofocus class="form-control" id="account_type" name="account_type">
-                                            <option value="" <?=($account_type=="")?"selected":"";?>>Pilih Tipe</option>
-                                            <option value="Debet" <?=($account_type=="Debet")?"selected":"";?>>Debet</option>
-                                            <option value="Kredit" <?=($account_type=="Kredit")?"selected":"";?>>Kredit</option>
-                                        </select>
-                                    </div>
-                                </div>                                                      
-                                <div class="form-group">
-                                    <label class="control-label col-sm-2" for="account_sort">Urutan:</label>
-                                    <div class="col-sm-10">
-                                        <input type="number" min="0" class="form-control" id="account_sort" name="account_sort" placeholder="" value="<?= $account_sort; ?>">
-                                    </div>
-                                </div>                                                      
-                                <div class="form-group">
-                                    <label class="control-label col-sm-2" for="account_name">Nama Akun:</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="account_name" name="account_name" placeholder="" value="<?= $account_name; ?>">
+                                        <input type="text" class="form-control" id="mastermetodepembayaran_name" name="mastermetodepembayaran_name" placeholder="" value="<?= $mastermetodepembayaran_name; ?>">
                                     </div>
                                 </div>                                                     
-                                <div class="form-group">
-                                    <label class="control-label col-sm-2" for="account_ispembayaran">Metode Pembayaran:</label>
-                                    <div class="col-sm-10">
-                                        <select onkeyup="mpembayaran()" class="form-control" id="account_ispembayaran" name="account_ispembayaran">
-                                            <option value="0" <?=($account_ispembayaran==0)?"selected":"";?>>Tidak</option>
-                                            <option value="1" <?=($account_ispembayaran==1)?"selected":"";?>>Ya</option>
-                                        </select>
-                                    </div>
-                                </div> 
-                                <script>
-                                    function mpembayaran(){
-                                        let account_ispembayaran = $("#account_ispembayaran").val();
-                                        if(account_ispembayaran==1){
-                                            $("#mastermb").show();
-                                        }else{
-                                            $("#mastermb").hide();
-                                        }
-                                    }
-                                    $(document).ready(function(){
-                                        mpembayaran();
-                                    });
-                                </script>
-                                <div class="form-group" id="mastermb">
-                                    <label class="control-label col-sm-2" for="mastermetodepembayaran_id">Jenis Metode Pembayaran:</label>
-                                    <div class="col-sm-10">
-                                        <select class="form-control select2" id="mastermetodepembayaran_id" name="mastermetodepembayaran_id">
-                                        <option value="0" <?=($mastermetodepembayaran_id==0)?"selected":"";?>>Pilih Jenis Metode Pembayaran</option>
-                                        <?php 
-                                        $mastermetodepembayaran=$this->db->table("mastermetodepembayaran")
-                                        ->where("store_id",session()->get("store_id"))
-                                        ->orderBy("mastermetodepembayaran_id","asc")
-                                        ->get();
-                                        foreach($mastermetodepembayaran->getResult() as $mastermetodepembayaran){?>
-                                            <option value="<?=$mastermetodepembayaran->mastermetodepembayaran_id;?>" <?=($mastermetodepembayaran_id==$mastermetodepembayaran->mastermetodepembayaran_id)?"selected":"";?>>(<?=$mastermetodepembayaran->mastermetodepembayaran_id;?>) <?=$mastermetodepembayaran->mastermetodepembayaran_name;?></option>
-                                        <?php }?>
-                                        </select>
-                                    </div>
-                                </div>        
+                                
 
-                                <input type="hidden" name="account_id" value="<?= $account_id; ?>" />
+                                <input type="hidden" name="mastermetodepembayaran_id" value="<?= $mastermetodepembayaran_id; ?>" />
                                 <div class="form-group">
                                     <div class="col-sm-offset-2 col-sm-10">
                                         <button type="submit" id="submit" class="btn btn-primary col-md-5" <?= $namabutton; ?> value="OK">Submit</button>
-                                        <button class="btn btn-warning col-md-offset-1 col-md-5" onClick="location.href=<?= site_url("account"); ?>">Back</button>
+                                        <button class="btn btn-warning col-md-offset-1 col-md-5" onClick="location.href=<?= site_url("mastermetodepembayaran"); ?>">Back</button>
                                     </div>
                                 </div>
                             </form>
@@ -149,32 +97,25 @@
                                         <?php if (!isset($_GET["report"])) { ?>
                                             <th>Action</th>
                                         <?php } ?>
-                                        <th>Tipe</th>
-                                        <th>Urutan</th>
                                         <th>Toko</th>
                                         <th>ID</th>
-                                        <th>Akun</th>
-                                        <th>Pembayaran</th>
-                                        <th>Jenis Pembayaran</th>
+                                        <th>Nama Metode Pembayaran</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
                                     $usr = $this->db
-                                        ->table("account")
-                                        ->join("store", "store.store_id=account.store_id", "left")
-                                        ->join("mastermetodepembayaran", "mastermetodepembayaran.mastermetodepembayaran_id=account.mastermetodepembayaran_id", "left")
-                                        ->where("account.store_id",session()->get("store_id"))
-                                        ->orderBy("account_name", "ASC")
+                                        ->table("mastermetodepembayaran")
+                                        ->join("store", "store.store_id=mastermetodepembayaran.store_id", "left")
+                                        ->where("mastermetodepembayaran.store_id",session()->get("store_id"))
+                                        ->orderBy("mastermetodepembayaran_name", "ASC")
                                         ->get();
                                     //echo $this->db->getLastquery();
                                     $no = 1;
-                                    $pembayaran=array("Tidak","Ya");
                                     foreach ($usr->getResult() as $usr) { ?>
                                         <tr>
                                             <?php if (!isset($_GET["report"])) { ?>
-                                                <td style="padding-left:0px; padding-right:0px;">
-                                                <?php  if(session()->get("store_akun")==1){?>
+                                                <td>
                                                     <?php 
                                                     if (
                                                         (
@@ -185,13 +126,13 @@
                                                             )
                                                         ) ||
                                                         (
-                                                            isset(session()->get("halaman")['22']['act_update']) 
-                                                            && session()->get("halaman")['22']['act_update'] == "1"
+                                                            isset(session()->get("halaman")['38']['act_update']) 
+                                                            && session()->get("halaman")['38']['act_update'] == "1"
                                                         )
                                                     ) { ?>
                                                     <form method="post" class="btn-action" style="">
                                                         <button class="btn btn-sm btn-warning " name="edit" value="OK"><span class="fa fa-edit" style="color:white;"></span> </button>
-                                                        <input type="hidden" name="account_id" value="<?= $usr->account_id; ?>" />
+                                                        <input type="hidden" name="mastermetodepembayaran_id" value="<?= $usr->mastermetodepembayaran_id; ?>" />
                                                     </form>
                                                     <?php }?>
                                                     
@@ -205,24 +146,19 @@
                                                             )
                                                         ) ||
                                                         (
-                                                            isset(session()->get("halaman")['22']['act_delete']) 
-                                                            && session()->get("halaman")['22']['act_delete'] == "1"
+                                                            isset(session()->get("halaman")['38']['act_delete']) 
+                                                            && session()->get("halaman")['38']['act_delete'] == "1"
                                                         )
                                                     ) { ?>
                                                     <form method="post" class="btn-action" style="">
                                                         <button class="btn btn-sm btn-danger delete" onclick="return confirm(' you want to delete?');" name="delete" value="OK"><span class="fa fa-close" style="color:white;"></span> </button>
-                                                        <input type="hidden" name="account_id" value="<?= $usr->account_id; ?>" />
+                                                        <input type="hidden" name="mastermetodepembayaran_id" value="<?= $usr->mastermetodepembayaran_id; ?>" />
                                                     </form>
                                                     <?php }?>
-                                                <?php }?>
                                                 </td>
                                             <?php } ?>
-                                            <td><?= $usr->account_type; ?></td>
-                                            <td><?= $usr->account_sort; ?></td>
                                             <td><?= $usr->store_name; ?></td>
-                                            <td><?= $usr->account_id; ?></td>
-                                            <td><?= $usr->account_name; ?></td>
-                                            <td><?= $pembayaran[$usr->account_ispembayaran]; ?></td>
+                                            <td><?= $usr->mastermetodepembayaran_id; ?></td>
                                             <td><?= $usr->mastermetodepembayaran_name; ?></td>
                                         </tr>
                                     <?php } ?>
@@ -237,7 +173,7 @@
 </div>
 <script>
     $('.select').select2();
-    var title = "Master Akun";
+    var title = "Master Nama Metode Pembayaran";
     $("title").text(title);
     $(".card-title").text(title);
     $("#page-title").text(title);

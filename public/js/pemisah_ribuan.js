@@ -147,12 +147,13 @@ function rupiahnumerik(a) {
     $(a).attr("type", "text");
     var id1 = $(a).attr("id") + "1";
     var name = $(a).attr("name");
+    var classnya = $(a).attr("class");
     var onchange = $(a).attr("change");
     var txt1 =
       '<input type="hidden" id="' +
       id1 +
       '" class="' +
-      name +
+      name + " " + classnya+"1" +
       '" name="' +
       name +
       '" value="" onchange="' +
@@ -165,9 +166,10 @@ function rupiahnumerik(a) {
       setTimeout(() => {
         document.getElementById(id1).value = angka;
       }, 500);
-      digitangka = numb.toString().split(".")[1].length;
-      rupiah = number_format(angka, digitangka, ",", ".");
-      if (angka <= 0) {
+      if (typeof angka === 'number' && angka >0) {        
+        digitangka = angka.toString().split(".")[1].length;
+        rupiah = number_format(angka, digitangka, ",", ".");
+      } else {
         rupiah = "";
       }
       $(a).val(rupiah);

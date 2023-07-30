@@ -118,6 +118,15 @@ $routes->add('/upload', 'api::upload');
 $routes->add('/tupload', 'api::tupload');
 
 
+$routes->add('/mmastermetodepembayaran', 'master\mmastermetodepembayaran::index');
+$routes->add('/mmetodepembayaran', 'master\mmetodepembayaran::index');
+$routes->add('/mmetodepembayarand', 'master\mmetodepembayarand::index');
+
+
+$routes->add('/arraymetodepembayaran', 'transaction\transaction::arraymetodepembayaran');
+$routes->add('/isipbyr', 'transaction\transaction::isipbyr');
+
+
 
 
 

@@ -4,35 +4,35 @@ namespace App\Models\master;
 
 use App\Models\core_m;
 
-class maccount_m extends core_m
+class mmetodepembayaran_m extends core_m
 {
     public function data()
     {
         $data = array();
         $data["message"] = "";
-        //cek account
-        if ($this->request->getVar("account_id")) {
-            $accountd["account_id"] = $this->request->getVar("account_id");
+        //cek metodepembayaran
+        if ($this->request->getVar("metodepembayaran_id")) {
+            $metodepembayarand["metodepembayaran_id"] = $this->request->getVar("metodepembayaran_id");
         } else {
-            $accountd["account_id"] = -1;
+            $metodepembayarand["metodepembayaran_id"] = -1;
         }
-            $accountd["store_id"] = session()->get("store_id");
+            $metodepembayarand["store_id"] = session()->get("store_id");
         $us = $this->db
-            ->table("account")
-            ->getWhere($accountd);
+            ->table("metodepembayaran")
+            ->getWhere($metodepembayarand);
         /* echo $this->db->getLastquery();
         die; */
-        $larang = array("log_id", "id", "user_id", "action", "data", "account_id_dep", "trx_id", "trx_code");
+        $larang = array("log_id", "id", "user_id", "action", "data", "metodepembayaran_id_dep", "trx_id", "trx_code");
         if ($us->getNumRows() > 0) {
-            foreach ($us->getResult() as $account) {
-                foreach ($this->db->getFieldNames('account') as $field) {
+            foreach ($us->getResult() as $metodepembayaran) {
+                foreach ($this->db->getFieldNames('metodepembayaran') as $field) {
                     if (!in_array($field, $larang)) {
-                        $data[$field] = $account->$field;
+                        $data[$field] = $metodepembayaran->$field;
                     }
                 }
             }
         } else {
-            foreach ($this->db->getFieldNames('account') as $field) {
+            foreach ($this->db->getFieldNames('metodepembayaran') as $field) {
                 $data[$field] = "";
             }
         }
@@ -41,29 +41,27 @@ class maccount_m extends core_m
 
         //delete
         if ($this->request->getPost("delete") == "OK") {  
-            $account_id=   $this->request->getPost("account_id");
-                      
+            $metodepembayaran_id=   $this->request->getPost("metodepembayaran_id");
             $this->db
-            ->table("account")
-            ->delete(array("account_id" => $this->request->getPost("account_id"),"store_id" =>session()->get("store_id")));
+            ->table("metodepembayaran")
+            ->delete(array("metodepembayaran_id" => $this->request->getPost("metodepembayaran_id"),"store_id" =>session()->get("store_id")));
             $data["message"] = "Delete Success";
-            
         }
 
         //insert
         if ($this->request->getPost("create") == "OK") {
             foreach ($this->request->getPost() as $e => $f) {
-                if ($e != 'create' && $e != 'account_id') {
+                if ($e != 'create' && $e != 'metodepembayaran_id') {
                     $input[$e] = $this->request->getPost($e);
                 }
             }
             $input["store_id"] = session()->get("store_id");
 
-            $builder = $this->db->table('account');
+            $builder = $this->db->table('metodepembayaran');
             $builder->insert($input);
             /* echo $this->db->getLastQuery();
             die; */
-            $account_id = $this->db->insertID();
+            $metodepembayaran_id = $this->db->insertID();
 
             $data["message"] = "Insert Data Success";
         }
@@ -72,12 +70,12 @@ class maccount_m extends core_m
         //update
         if ($this->request->getPost("change") == "OK") {
             foreach ($this->request->getPost() as $e => $f) {
-                if ($e != 'change' && $e != 'account_picture') {
+                if ($e != 'change' && $e != 'metodepembayaran_picture') {
                     $input[$e] = $this->request->getPost($e);
                 }
             }
             $input["store_id"] = session()->get("store_id");
-            $this->db->table('account')->update($input, array("account_id" => $this->request->getPost("account_id")));
+            $this->db->table('metodepembayaran')->update($input, array("metodepembayaran_id" => $this->request->getPost("metodepembayaran_id")));
             $data["message"] = "Update Success";
             //echo $this->db->last_query();die;
         }
