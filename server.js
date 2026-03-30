@@ -42,14 +42,16 @@ async function sendRooms(socket) {
     try {
         // query persis PHP
         const sql = `
-            SELECT p.*, c.category_id, c.category_name,
+            SELECT p.*, c.category_id, c.category_name, u.user_id, u.user_name,
                    (SELECT product_name FROM product WHERE product_lanjutan = p.product_id LIMIT 1) AS pname
             FROM product p
             LEFT JOIN category c ON c.category_id = p.category_id
+            LEFT JOIN user u ON u.user_id = p.product_therapist
             WHERE p.category_id = 100 AND p.product_lanjutan = 0
             ORDER BY p.product_urutan ASC
         `;
         const rooms = await query(sql);
+        // console.log(rooms);
         socket.emit("rooms", rooms);
     } catch (err) {
         console.error(err);

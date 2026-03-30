@@ -113,19 +113,19 @@
 
 						if (now >= start && now < bend) {
 							status = "success";
-							nstatus = "TERISI";
+							nstatus = room.customer_name ? room.customer_name : "TERISI";
 							bg = "#ddf3e4";
 							show = true;
 
 						} else if (now >= bend && now <= end) {
 							status = "warning";
-							nstatus = "AKAN HABIS";
+							nstatus = room.customer_name ? room.customer_name : "TERISI";
 							bg = "#f9f7e1";
 							show = true;
 
 						} else if (now > end && now <= end + 10 * 60 * 1000) {
 							status = "danger";
-							nstatus = "SELESAI";
+							nstatus = room.customer_name ? room.customer_name : "TERISI";
 							bg = "#f7d7d7";
 							show = true;
 						}
@@ -140,6 +140,7 @@
 					}
 
 					return {
+						user_name: room.user_name,
 						sisa,
 						status,
 						nstatus,
@@ -156,6 +157,7 @@
 
 					Object.values(roomsData).forEach(room => {
 						const r = hitung(room);
+						// console.log(room.user_name);
 
 						html += `
         <div class="col-lg-2 p-2 rounded">
@@ -166,13 +168,17 @@
                     <div class="text p-2 text-center row">
 
                         <div class="judul col-12">${room.product_name}</div>
-                        <div class="subjudul1 text-${r.status} col-12">${room.customer_name || ''}</div>
+                        <div class="subjudul1 text-danger col-12">${room.user_name || ''}</div>
 
                         <div class="col-12 d-grid">
 
-                            <button class="btn btn-sm btn-${r.status}">
-                                ${r.nstatus}
-                            </button>
+                           <button class="btn btn-sm btn-${
+								(r.status == 'success' || r.status == 'warning' || r.status == 'danger')
+									? 'light'
+									: r.status
+							}">
+								${r.nstatus}
+							</button>
 
                             ${
                                 r.show
@@ -234,5 +240,3 @@
 </div> <?php echo $this->include("template/footersaja_v"); ?>
 <?php //echo $this->endSection(); 
 ?>
-
-

@@ -482,6 +482,7 @@ class transaction extends baseController
                             $input1["transaction_id"] = $transaction_id;
                             $input1["product_bend"] = $transactiond_bend;
                             $input1["product_end"] = $transactiond_end;
+                            $input1["product_therapist"] = $therapist;
                         }
                         $product->update($input1, $where1);
                         $message .= $this->db->getLastQuery() . "<br/>";
@@ -523,6 +524,7 @@ class transaction extends baseController
                         $input1["transaction_id"] = $transaction_id;
                         $input1["product_bend"] = $transactiond_bend;
                         $input1["product_end"] = $transactiond_end;
+                        $input1["product_therapist"] = $therapist;
                     }
                     $product->update($input1, $where1);
                     $message .= $this->db->getLastQuery() . "<br/>";
@@ -923,6 +925,11 @@ class transaction extends baseController
         $where["transaction_id"] = $this->request->getGet("transaction_id");
         $this->db->table("transaction")
             ->update($input, $where);
+
+             $inputt["customer_name"] = $this->request->getGet("transaction_tamu");
+        $wheret["transaction_id"] = $this->request->getGet("transaction_id");
+        $this->db->table("product")
+            ->update($inputt, $wheret);
         // echo $this->db->getLastQuery();
     }
 
