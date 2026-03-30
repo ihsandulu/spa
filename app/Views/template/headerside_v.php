@@ -319,6 +319,25 @@
                             )
                         ) ||
                         (
+                            isset(session()->get("halaman")['39']['act_read']) 
+                            && session()->get("halaman")['39']['act_read'] == "1"
+                        )
+                    ) { ?>
+                    <li> 
+                        <a class="  " href="<?= base_url("mpaket"); ?>" aria-expanded="false"><i class="fa fa-cube"></i><span class="hide-menu">Paket</span></a>
+                    </li>
+                    <?php }?>
+
+                    <?php 
+                    if (
+                        (
+                            isset(session()->get("position_administrator")[0][0]) 
+                            && (
+                                session()->get("position_administrator") == "1" 
+                                || session()->get("position_administrator") == "2"
+                            )
+                        ) ||
+                        (
                             isset(session()->get("halaman")['8']['act_read']) 
                             && session()->get("halaman")['8']['act_read'] == "1"
                         )

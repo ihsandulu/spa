@@ -46,7 +46,7 @@ class mproduct_m extends core_m
             $data["product_buy"] = 0;
            foreach ($purchase->getResult() as $purchase) {$data["product_buy"] = $purchase->purchased_price/$purchase->purchased_qty;}
         }
-
+// dd( $data);die;
         //upload image
         $data['uploadproduct_picture'] = "";
         if (isset($_FILES['product_picture']) && $_FILES['product_picture']['name'] != "") {
@@ -66,7 +66,7 @@ class mproduct_m extends core_m
             if ($type == 'image/jpg'||$type == 'image/jpeg'||$type == 'image/png') //cek mime file
             {    // File Tipe Sesuai   
                 helper('filesystem'); // Load Helper File System
-                $direktori = ROOTPATH . 'public\images\product_picture'; //definisikan direktori upload            
+                $direktori = ROOTPATH . 'images\product_picture'; //definisikan direktori upload            
                 $product_picture = str_replace(' ', '_', $name);
                 $product_picture = date("H_i_s_") . $product_picture; //definisikan nama fiel yang baru
                 $map = directory_map($direktori, FALSE, TRUE); // List direktori

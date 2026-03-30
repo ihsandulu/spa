@@ -48,6 +48,9 @@ $routes->add('/munit', 'master\munit::index');
 $routes->add('/mproduct', 'master\mproduct::index');
 $routes->add('/mroom', 'master\mproduct::room');
 $routes->add('/mloker', 'master\mproduct::loker');
+$routes->add('/bproduct', 'master\mproduct::listbproduct');
+$routes->add('/dlistbproduct', 'master\mproduct::dlistbproduct');
+$routes->add('/mpaket', 'master\mproduct::paket');
 $routes->add('/urutan', 'api::urutan');
 
 $routes->add('/transaction', 'transaction\transaction::index');

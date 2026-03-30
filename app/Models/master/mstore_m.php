@@ -56,7 +56,7 @@ class mstore_m extends core_m
             if ($type == 'image/jpg'||$type == 'image/jpeg'||$type == 'image/png') //cek mime file
             {    // File Tipe Sesuai   
                 helper('filesystem'); // Load Helper File System
-                $direktori = ROOTPATH . 'public\images\store_picture'; //definisikan direktori upload            
+                $direktori = ROOTPATH . 'images\store_picture'; //definisikan direktori upload            
                 $store_picture = str_replace(' ', '_', $name);
                 $store_picture = date("H_i_s_") . $store_picture; //definisikan nama fiel yang baru
                 $map = directory_map($direktori, FALSE, TRUE); // List direktori
