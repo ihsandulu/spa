@@ -124,8 +124,18 @@ class display extends baseController
         $input["product_bend"] = "0000-00-00 00:00:00";
         $input["product_end"] = "0000-00-00 00:00:00";
         $input["product_status"] = $this->request->getGet("product_status");
+        if(isset($_GET["customer_name"])){
+            $input["customer_name"] = $this->request->getGet("customer_name");
+        }
+        if(isset($_GET["product_therapist"])){
+            $input["product_therapist"] = $this->request->getGet("product_therapist");
+        }
         $where["product_id"] = $this->request->getGet("product_id");
         $this->db->table("product")
             ->update($input, $where);
+            echo $this->db->getLastQuery();
     }
+
+    
+    
 }
