@@ -124,18 +124,37 @@ class display extends baseController
         $input["product_bend"] = "0000-00-00 00:00:00";
         $input["product_end"] = "0000-00-00 00:00:00";
         $input["product_status"] = $this->request->getGet("product_status");
-        if(isset($_GET["customer_name"])){
+        if (isset($_GET["customer_name"])) {
             $input["customer_name"] = $this->request->getGet("customer_name");
         }
-        if(isset($_GET["product_therapist"])){
+        if (isset($_GET["product_therapist"])) {
             $input["product_therapist"] = $this->request->getGet("product_therapist");
         }
+        $input["transaction_id"] = "0";
         $where["product_id"] = $this->request->getGet("product_id");
         $this->db->table("product")
             ->update($input, $where);
-            echo $this->db->getLastQuery();
+        echo $this->db->getLastQuery();
     }
 
-    
-    
+    public function cekroomorigin()
+    {
+        $this->db->query("
+        UPDATE product
+        SET 
+            product_status     = 0,
+            customer_name      = '',
+            product_therapist  = 0,
+            product_start      = '0000-00-00 00:00:00',
+            product_bend       = '0000-00-00 00:00:00',
+            product_end        = '0000-00-00 00:00:00',
+            transaction_id     = 0
+        WHERE 
+            category_id = 100
+            AND transaction_id > 0
+            AND product_status = 0
+            AND NOW() > DATE_ADD(product_end, INTERVAL 60 SECOND)
+    ");
+    echo $this->db->affectedRows();
+    }
 }

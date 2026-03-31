@@ -122,13 +122,14 @@
 							bg = "#f9f7e1";
 							show = true;
 
-						} else if (now > end && now <= end + 10 * 60 * 1000) {
+						} else if (now > end && now <= end + 1 * 60 * 1000) {
 							status = "danger";
 							nstatus = room.customer_name ? room.customer_name : "TERISI";
 							bg = "#f7d7d7";
 							show = true;
 						}else{
-							$.get("<?= base_url("droomstatus"); ?>", {
+							
+							/* $.get("<?= base_url("droomstatus"); ?>", {
 								product_id: room.product_id,
 								product_status: '0',
 								customer_name: '',
@@ -136,7 +137,7 @@
 							})
 							.done(function(data) {
 								// alert(data);
-							});
+							}); */
 						}
 
 					} else if (room.product_status == 1) {

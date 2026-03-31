@@ -116,6 +116,7 @@ $routes->add('/roomstatus', 'utama::roomstatus');
 $routes->add('/display', 'display::index');
 $routes->add('/droom', 'display::room');
 $routes->add('/droomstatus', 'display::roomstatus');
+$routes->add('/cekroomorigin', 'display::cekroomorigin');
 
 $routes->add('/upload', 'api::upload');
 $routes->add('/tupload', 'api::tupload');

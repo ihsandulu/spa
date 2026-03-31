@@ -1,4 +1,13 @@
 // socket-server.js (revisi)
+require('dotenv').config();
+
+const BASE_URL = process.env.NODE_BASE_URL;
+
+if (!BASE_URL) {
+    console.error("NODE_BASE_URL tidak ditemukan di .env");
+    process.exit(1);
+}
+
 const mysql = require("mysql2");
 const { Server } = require("socket.io");
 const http = require("http");
@@ -57,5 +66,20 @@ async function sendRooms(socket) {
         console.error(err);
     }
 }
+
+async function cekroomorigin() {
+    try {
+        const res = await fetch(`${BASE_URL}/cekroomorigin`);
+        const data = await res.text();
+
+        console.log("UPDATED ROW:", data);
+
+        // console.log("OK:", BASE_URL);
+    } catch (err) {
+        // console.error("Error:", err.message);
+    }
+}
+
+setInterval(cekroomorigin, 5000);
 
 server.listen(3000, () => console.log("Socket.IO server running on port 3000"));

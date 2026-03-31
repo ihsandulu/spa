@@ -6,3 +6,4 @@ pm2 save
 
 Install Node Js
 npm install socket.io
+npm install dotenv
