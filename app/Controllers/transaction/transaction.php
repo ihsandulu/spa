@@ -390,6 +390,13 @@ class transaction extends baseController
             $therapist = "0";
         }
 
+        // nama customer
+        if (isset($_GET["customer_name"])) {
+            $customer_name = $this->request->getGet("customer_name");
+        } else {
+            $customer_name = "";
+        }
+
         // diskon
         if (isset($_GET["xfoc"])) {
             $foc = $this->request->getGet("xfoc");
@@ -483,6 +490,7 @@ class transaction extends baseController
                             $input1["product_bend"] = $transactiond_bend;
                             $input1["product_end"] = $transactiond_end;
                             $input1["product_therapist"] = $therapist;
+                            $input1["customer_name"] = $customer_name;
                         }
                         $product->update($input1, $where1);
                         $message .= $this->db->getLastQuery() . "<br/>";
@@ -525,6 +533,7 @@ class transaction extends baseController
                         $input1["product_bend"] = $transactiond_bend;
                         $input1["product_end"] = $transactiond_end;
                         $input1["product_therapist"] = $therapist;
+                        $input1["customer_name"] = $customer_name;
                     }
                     $product->update($input1, $where1);
                     $message .= $this->db->getLastQuery() . "<br/>";
@@ -926,7 +935,7 @@ class transaction extends baseController
         $this->db->table("transaction")
             ->update($input, $where);
 
-             $inputt["customer_name"] = $this->request->getGet("transaction_tamu");
+        $inputt["customer_name"] = $this->request->getGet("transaction_tamu");
         $wheret["transaction_id"] = $this->request->getGet("transaction_id");
         $this->db->table("product")
             ->update($inputt, $wheret);

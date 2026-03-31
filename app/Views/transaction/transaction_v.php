@@ -1144,6 +1144,7 @@
                             let xfoc = $("#xfoc").val();
                             let xnominal = $("#xnominal1").val();
                             let xpercent = $("#xpercent1").val();
+                            let customer_name = $("#transaction_tamu").val();
                             $("#transactiond_id").val(0);
                             // $("#test").html("<?= base_url("insertnota"); ?>?transaction_id="+transaction_id+"&product_id="+product_id+"&transactiond_qty="+transactiond_qty+"&start="+start+"&xtherapist="+xtherapist+"&xfoc="+xfoc+"&xnominal="+xnominal+"&xpercent="+xpercent);
                             $.get("<?= base_url("insertnota"); ?>", {
@@ -1154,7 +1155,8 @@
                                     xtherapist: xtherapist,
                                     xfoc: xfoc,
                                     xnominal: xnominal,
-                                    xpercent: xpercent
+                                    xpercent: xpercent,
+                                    customer_name:customer_name
                                 })
                                 .done(function(data) {
                                     // alert(data);
