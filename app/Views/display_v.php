@@ -116,7 +116,6 @@
 							nstatus = room.customer_name ? room.customer_name : "TERISI";
 							bg = "#ddf3e4";
 							show = true;
-
 						} else if (now >= bend && now <= end) {
 							status = "warning";
 							nstatus = room.customer_name ? room.customer_name : "TERISI";
@@ -128,6 +127,16 @@
 							nstatus = room.customer_name ? room.customer_name : "TERISI";
 							bg = "#f7d7d7";
 							show = true;
+						}else{
+							$.get("<?= base_url("droomstatus"); ?>", {
+								product_id: room.product_id,
+								product_status: '0',
+								customer_name: '',
+								product_therapist: '0'
+							})
+							.done(function(data) {
+								// alert(data);
+							});
 						}
 
 					} else if (room.product_status == 1) {
@@ -138,15 +147,7 @@
 						status = "dark";
 						nstatus = "RUSAK";
 					} else {							
-						$.get("<?= base_url("droomstatus"); ?>", {
-								product_id: room.product_id,
-								product_status: '0',
-								customer_name: '',
-								product_therapist: '0'
-							})
-							.done(function(data) {
-								// alert(data);
-							});
+						
 					}
 
 					return {
