@@ -131,6 +131,9 @@ $routes->add('/arraymetodepembayaran', 'transaction\transaction::arraymetodepemb
 $routes->add('/isipbyr', 'transaction\transaction::isipbyr');
 
 
+$routes->add('/cektherapist', 'transaction\transaction::cektherapist');
+
+
 
 
 

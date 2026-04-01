@@ -114,7 +114,7 @@
         opacity: 0.1;
     }
 
-   
+
 
     .mb-5 {
         margin-bottom: -5px;
@@ -152,12 +152,15 @@
     }
 
     .fdnota {
-        font-size: 10px !important; border-radius: 5px;
+        font-size: 10px !important;
+        border-radius: 5px;
     }
-    .p5{
+
+    .p5 {
         padding: 5px !important;
     }
-    .mt4{
+
+    .mt4 {
         margin-top: 4px !important;
     }
 </style>
@@ -522,11 +525,13 @@
                                             <label for="xtherapist" class="">Therapist:</label>
                                             <select class="form-control" id="xtherapist">
                                                 <option value="">Pilih Therapist</option>
-                                                <?php $therapist = $this->db->table("category")
-                                                    ->join("position", "position.position_id=category.position_id", "left")
-                                                    ->join("user", "user.position_id=position.position_id", "left")
-                                                    ->where("category.position_id >", "0")
-                                                    ->groupBy("user.user_id")
+                                                <?php $therapist = $this->db->table("user")
+                                                    ->where("position_id", 100)
+                                                    ->whereNotIn("user.user_id", function ($builder) {
+                                                        return $builder->select("product_therapist")
+                                                            ->from("product")
+                                                            ->where("product_therapist >", 0);
+                                                    })
                                                     ->get();
                                                 foreach ($therapist->getResult() as $xtherapist) { ?>
                                                     <option value="<?= $xtherapist->user_id; ?>"><?= $xtherapist->user_name; ?></option>
@@ -1129,6 +1134,10 @@
                                 rupiahnumerik($("#xnominal"));
                                 rupiahnumerik($("#xpercent"));
                                 fokus('insertqty');
+                                $.get("<?= base_url("cektherapist"); ?> ?>")
+                                    .done(function(data) {
+                                        $("#xtherapist").html(data);
+                                    });
                             } else {
                                 toast('INFO >>>', 'Nota tidak ditemukan!');
                             }
@@ -1156,7 +1165,7 @@
                                     xfoc: xfoc,
                                     xnominal: xnominal,
                                     xpercent: xpercent,
-                                    customer_name:customer_name
+                                    customer_name: customer_name
                                 })
                                 .done(function(data) {
                                     // alert(data);

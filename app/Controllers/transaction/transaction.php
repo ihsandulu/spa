@@ -328,8 +328,18 @@ class transaction extends baseController
         $listnota = $builder
             ->get();
         foreach ($listnota->getResult() as $listnota) {
+            $listproduknya = "";
+            $transactiond = $this->db->table("transactiond")
+                ->join("product", "product.product_id=transactiond.product_id")
+                ->where("transactiond.transaction_id", $listnota->transaction_id)
+                ->where("product.category_id", 100)
+                ->get();
+
+            foreach ($transactiond->getResult() as $d) {
+                $listproduknya .= $d->product_name . ", ";
+            }
 ?>
-            <button onclick="nota(<?= $listnota->transaction_id; ?>);" class="btn btn-outline-secondary mb-2  btn-child" type="button"><small><?= $listnota->transaction_no; ?></small></button>
+            <button onclick="nota(<?= $listnota->transaction_id; ?>);" class="btn btn-outline-secondary mb-2  btn-child" type="button"><small><?= $listnota->transaction_tamu; ?> (<?= rtrim($listproduknya, ", ") ?>)</small></button>
         <?php
         }
     }
@@ -1691,7 +1701,7 @@ class transaction extends baseController
                     rupiahnumerik($("#nominal-<?= $metodepembayarand->metodepembayarand_id; ?>-<?= $no; ?>"))
                 </script>
             </div>
-<?php $no++;
+        <?php $no++;
         }
     }
 
@@ -1713,5 +1723,20 @@ class transaction extends baseController
             $no++;
         }
         return $lempar;
+    }
+
+    public function cektherapist()
+    {
+        $therapist = $this->db->table("user")
+            ->where("position_id", 100)
+            ->whereNotIn("user.user_id", function ($builder) {
+                return $builder->select("product_therapist")
+                    ->from("product")
+                    ->where("product_therapist >", 0);
+            })
+            ->get();
+        foreach ($therapist->getResult() as $xtherapist) { ?>
+            <option value="<?= $xtherapist->user_id; ?>"><?= $xtherapist->user_name; ?></option>
+<?php }
     }
 }

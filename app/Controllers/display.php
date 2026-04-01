@@ -139,22 +139,35 @@ class display extends baseController
 
     public function cekroomorigin()
     {
-        $this->db->query("
-        UPDATE product
-        SET 
-            product_status     = 0,
-            customer_name      = '',
-            product_therapist  = 0,
-            product_start      = '0000-00-00 00:00:00',
-            product_bend       = '0000-00-00 00:00:00',
-            product_end        = '0000-00-00 00:00:00',
-            transaction_id     = 0
-        WHERE 
-            category_id = 100
-            AND transaction_id > 0
-            AND product_status = 0
-            AND NOW() > DATE_ADD(product_end, INTERVAL 60 SECOND)
-    ");
+       $this->db->table('product')
+    ->set([
+        'product_status'    => 0,
+        'customer_name'     => '',
+        'product_therapist' => 0,
+        'product_start'     => '0000-00-00 00:00:00',
+        'product_bend'      => '0000-00-00 00:00:00',
+        'product_end'       => '0000-00-00 00:00:00',
+        'transaction_id'    => 0,
+    ])
+    ->where('category_id', 100)
+    ->groupStart()
+        ->groupStart()
+            ->where('transaction_id >', 0)
+            ->where('product_status', 0)
+            ->where('NOW() > DATE_ADD(product_end, INTERVAL 60 SECOND)', null, false)
+        ->groupEnd()
+        ->orGroupStart()
+            ->where('transaction_id', 0)
+            ->groupStart()
+                ->where('customer_name !=', '')
+                ->orWhere('product_therapist >', 0)
+                ->orWhere('product_start !=', '0000-00-00 00:00:00')
+                ->orWhere('product_bend !=', '0000-00-00 00:00:00')
+                ->orWhere('product_end !=', '0000-00-00 00:00:00')
+            ->groupEnd()
+        ->groupEnd()
+    ->groupEnd()
+    ->update();
     echo $this->db->affectedRows();
     }
 }
