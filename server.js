@@ -2,6 +2,7 @@
 require('dotenv').config();
 
 const BASE_URL = process.env.NODE_BASE_URL;
+const MYSQL_PORT = process.env.MYSQL_PORT || 3306;
 
 if (!BASE_URL) {
     console.error("NODE_BASE_URL tidak ditemukan di .env");
@@ -22,7 +23,7 @@ const db = mysql.createPool({
     user: "root",
     password: "",
     database: "spa2",
-    port: 3307
+    port: MYSQL_PORT 
 });
 
 function query(sql, params) {
