@@ -1726,7 +1726,9 @@ class transaction extends baseController
     }
 
     public function cektherapist()
-    {
+    { ?>
+        <option value="0">Pilih Therapist</option>
+        <?php
         $therapist = $this->db->table("user")
             ->where("position_id", 100)
             ->whereNotIn("user.user_id", function ($builder) {

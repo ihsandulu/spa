@@ -524,7 +524,7 @@
                                         <div class="form-group hide" id="ptherapist">
                                             <label for="xtherapist" class="">Therapist:</label>
                                             <select class="form-control" id="xtherapist">
-                                                <option value="">Pilih Therapist</option>
+                                                <option value="0">Pilih Therapist</option>
                                                 <?php $therapist = $this->db->table("user")
                                                     ->where("position_id", 100)
                                                     ->whereNotIn("user.user_id", function ($builder) {
