@@ -1731,11 +1731,11 @@ class transaction extends baseController
         <?php
         $therapist = $this->db->table("user")
             ->where("position_id", 100)
-            ->whereNotIn("user.user_id", function ($builder) {
+            /* ->whereNotIn("user.user_id", function ($builder) {
                 return $builder->select("product_therapist")
                     ->from("product")
                     ->where("product_therapist >", 0);
-            })
+            }) */
             ->get();
         foreach ($therapist->getResult() as $xtherapist) { ?>
             <option value="<?= $xtherapist->user_id; ?>"><?= $xtherapist->user_name; ?></option>
